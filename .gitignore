@@ -1,6 +1,13 @@
 # dependencies
 node_modules
 
+# all dot files and folders by default
+.*
+
+# whitelist essential dot files
+!.gitignore
+!.env.example
+
 # yarn
 .yarn/*
 !.yarn/patches
