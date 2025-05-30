@@ -18,6 +18,13 @@ node_modules
 # IDE
 .vscode
 .idea
+.cursor
 
 # cli
 dist
+
+# github
+.github
+
+# git hooks
+.husky
