@@ -1,71 +1,68 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import type { NextPage } from "next";
-import { useAccount } from "wagmi";
-import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { BanknotesIcon } from "@heroicons/react/24/outline";
 import { Address } from "~~/components/scaffold-eth";
 
+interface ImagePost {
+  id: number;
+  imageUrl: string;
+  prizePool: string;
+  creator: string;
+}
+
+// Temporary mock data
+const mockImages: ImagePost[] = [
+  {
+    id: 1,
+    imageUrl: "https://picsum.photos/400/400",
+    prizePool: "0.5",
+    creator: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+  },
+  {
+    id: 2,
+    imageUrl: "https://picsum.photos/400/400",
+    prizePool: "0.8",
+    creator: "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+  },
+];
+
 const Home: NextPage = () => {
-  const { address: connectedAddress } = useAccount();
-
   return (
-    <>
-      <div className="flex items-center flex-col grow pt-10">
-        <div className="px-5">
-          <h1 className="text-center">
-            <span className="block text-2xl mb-2">Welcome to</span>
-            <span className="block text-4xl font-bold">Scaffold-ETH 2</span>
-          </h1>
-          <div className="flex justify-center items-center space-x-2 flex-col">
-            <p className="my-2 font-medium">Connected Address:</p>
-            <Address address={connectedAddress} />
-          </div>
-
-          <p className="text-center text-lg">
-            Get started by editing{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/nextjs/app/page.tsx
-            </code>
-          </p>
-          <p className="text-center text-lg">
-            Edit your smart contract{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              YourContract.sol
-            </code>{" "}
-            in{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/hardhat/contracts
-            </code>
-          </p>
-        </div>
-
-        <div className="grow bg-base-300 w-full mt-16 px-8 py-12">
-          <div className="flex justify-center items-center gap-12 flex-col md:flex-row">
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <BugAntIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Tinker with your smart contract using the{" "}
-                <Link href="/debug" passHref className="link">
-                  Debug Contracts
-                </Link>{" "}
-                tab.
-              </p>
-            </div>
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <MagnifyingGlassIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Explore your local transactions with the{" "}
-                <Link href="/blockexplorer" passHref className="link">
-                  Block Explorer
-                </Link>{" "}
-                tab.
-              </p>
-            </div>
-          </div>
-        </div>
+    <div className="flex flex-col py-8 px-4 lg:px-8 min-h-screen">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold">Prompt Guesser</h1>
+        <Link href="/create" className="btn btn-primary">
+          Add New Image
+        </Link>
       </div>
-    </>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {mockImages.map(image => (
+          <Link
+            href={`/guess/${image.id}`}
+            key={image.id}
+            className="card bg-base-100 shadow-xl hover:shadow-2xl transition-all"
+          >
+            <figure className="relative aspect-square">
+              <Image src={image.imageUrl} alt="AI Generated" fill className="object-cover" />
+            </figure>
+            <div className="card-body p-4">
+              <div className="flex items-center gap-2">
+                <BanknotesIcon className="h-5 w-5" />
+                <span className="text-lg font-semibold">{image.prizePool} ETH</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm opacity-70">
+                <span>Created by:</span>
+                <Address address={image.creator} />
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
   );
 };
 
