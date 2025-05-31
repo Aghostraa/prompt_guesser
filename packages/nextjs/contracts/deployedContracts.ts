@@ -25,43 +25,270 @@ const deployedContracts = {
           inputs: [
             {
               indexed: true,
+              internalType: "uint256",
+              name: "challengeId",
+              type: "uint256",
+            },
+            {
+              indexed: true,
               internalType: "address",
-              name: "greetingSetter",
+              name: "creator",
               type: "address",
             },
             {
               indexed: false,
               internalType: "string",
-              name: "newGreeting",
+              name: "imageUrl",
+              type: "string",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "initialPrizePool",
+              type: "uint256",
+            },
+          ],
+          name: "ChallengeCreated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "challengeId",
+              type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "guesser",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "string",
+              name: "guessString",
               type: "string",
             },
             {
               indexed: false,
               internalType: "bool",
-              name: "premium",
+              name: "isCorrect",
               type: "bool",
+            },
+          ],
+          name: "GuessMade",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "challengeId",
+              type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "winner",
+              type: "address",
             },
             {
               indexed: false,
               internalType: "uint256",
-              name: "value",
+              name: "amount",
               type: "uint256",
             },
           ],
-          name: "GreetingChange",
+          name: "PrizeAwarded",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "challengeId",
+              type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "contributor",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "PrizePoolIncreased",
           type: "event",
         },
         {
           inputs: [],
-          name: "greeting",
+          name: "GUESS_FEE",
           outputs: [
             {
-              internalType: "string",
+              internalType: "uint256",
               name: "",
-              type: "string",
+              type: "uint256",
             },
           ],
           stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "challenges",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "id",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "creator",
+              type: "address",
+            },
+            {
+              internalType: "bytes32",
+              name: "hashedPrompt",
+              type: "bytes32",
+            },
+            {
+              internalType: "string",
+              name: "imageUrl",
+              type: "string",
+            },
+            {
+              internalType: "uint256",
+              name: "prizePool",
+              type: "uint256",
+            },
+            {
+              internalType: "bool",
+              name: "isActive",
+              type: "bool",
+            },
+            {
+              internalType: "uint256",
+              name: "creationTime",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32",
+              name: "_hashedPrompt",
+              type: "bytes32",
+            },
+            {
+              internalType: "string",
+              name: "_imageUrl",
+              type: "string",
+            },
+            {
+              internalType: "uint256",
+              name: "_initialPrizePool",
+              type: "uint256",
+            },
+          ],
+          name: "createChallenge",
+          outputs: [],
+          stateMutability: "payable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "_challengeId",
+              type: "uint256",
+            },
+          ],
+          name: "getChallenge",
+          outputs: [
+            {
+              components: [
+                {
+                  internalType: "uint256",
+                  name: "id",
+                  type: "uint256",
+                },
+                {
+                  internalType: "address",
+                  name: "creator",
+                  type: "address",
+                },
+                {
+                  internalType: "bytes32",
+                  name: "hashedPrompt",
+                  type: "bytes32",
+                },
+                {
+                  internalType: "string",
+                  name: "imageUrl",
+                  type: "string",
+                },
+                {
+                  internalType: "uint256",
+                  name: "prizePool",
+                  type: "uint256",
+                },
+                {
+                  internalType: "bool",
+                  name: "isActive",
+                  type: "bool",
+                },
+                {
+                  internalType: "uint256",
+                  name: "creationTime",
+                  type: "uint256",
+                },
+              ],
+              internalType: "struct YourContract.Challenge",
+              name: "",
+              type: "tuple",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "_challengeId",
+              type: "uint256",
+            },
+            {
+              internalType: "string",
+              name: "_guess",
+              type: "string",
+            },
+          ],
+          name: "makeGuess",
+          outputs: [],
+          stateMutability: "payable",
           type: "function",
         },
         {
@@ -79,65 +306,7 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "premium",
-          outputs: [
-            {
-              internalType: "bool",
-              name: "",
-              type: "bool",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "string",
-              name: "_newGreeting",
-              type: "string",
-            },
-          ],
-          name: "setGreeting",
-          outputs: [],
-          stateMutability: "payable",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "totalCounter",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
-          ],
-          name: "userGreetingCounter",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "withdraw",
+          name: "withdrawContractBalance",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",

@@ -4,57 +4,55 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { NextPage } from "next";
+import { formatEther } from "viem";
 import { BanknotesIcon } from "@heroicons/react/24/outline";
 import { Address } from "~~/components/scaffold-eth";
+import { useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
 
 export interface ImagePost {
-  id: number;
+  id: bigint;
   prompt?: string;
   imageUrl: string;
   prizePool: string;
   creator: string;
 }
 
-// Initial mock data
-const initialMockImages: ImagePost[] = [
-  {
-    id: 1,
-    imageUrl: "https://picsum.photos/400/400",
-    prizePool: "0.5",
-    creator: "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
-  },
-  {
-    id: 2,
-    imageUrl: "https://picsum.photos/400/400",
-    prizePool: "0.8",
-    creator: "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
-  },
-];
-
 const Home: NextPage = () => {
-  const [allImages, setAllImages] = useState<ImagePost[]>(initialMockImages);
+  const [allImages, setAllImages] = useState<ImagePost[]>([]);
+  const [isLoadingChallenges, setIsLoadingChallenges] = useState(true);
+
+  const { data: challengeEvents, isLoading: isLoadingEvents } = useScaffoldEventHistory({
+    contractName: "YourContract",
+    eventName: "ChallengeCreated",
+    fromBlock: BigInt(process.env.NEXT_PUBLIC_DEPLOY_BLOCK || "0"),
+    watch: true,
+  });
 
   useEffect(() => {
-    // Load images from localStorage on component mount (client-side)
-    try {
-      const storedImagesString = localStorage.getItem("userImagePosts");
-      if (storedImagesString) {
-        const storedImages: ImagePost[] = JSON.parse(storedImagesString);
-        // Combine mock images with stored images, ensuring no duplicates by id
-        setAllImages(prevImages => {
-          const combined = [...prevImages];
-          storedImages.forEach(storedImg => {
-            if (!combined.find(img => img.id === storedImg.id)) {
-              combined.push(storedImg);
-            }
-          });
-          return combined.sort((a, b) => b.id - a.id); // Sort by ID, newest first
-        });
-      }
-    } catch (error) {
-      console.error("Failed to load image posts from localStorage:", error);
+    setIsLoadingChallenges(isLoadingEvents);
+    if (challengeEvents) {
+      const formattedChallenges = challengeEvents
+        .map(event => {
+          if (
+            event.args.challengeId === undefined ||
+            event.args.imageUrl === undefined ||
+            event.args.creator === undefined
+          ) {
+            return null; // Skip if essential data is missing
+          }
+          return {
+            id: event.args.challengeId,
+            imageUrl: event.args.imageUrl,
+            prizePool: event.args.initialPrizePool ? formatEther(event.args.initialPrizePool) : "0",
+            creator: event.args.creator,
+            // prompt is not part of ChallengeCreated event, so it will be undefined here
+          };
+        })
+        .filter((challenge): challenge is ImagePost => challenge !== null) // Type guard to filter out nulls and assert type
+        .sort((a, b) => Number(b.id) - Number(a.id)); // Sort by ID, newest first
+      setAllImages(formattedChallenges);
     }
-  }, []);
+  }, [challengeEvents, isLoadingEvents]);
 
   return (
     <div className="flex flex-col py-8 px-4 lg:px-8 min-h-screen">
@@ -65,7 +63,8 @@ const Home: NextPage = () => {
         </Link>
       </div>
 
-      {allImages.length === 0 ? (
+      {isLoadingChallenges && <div className="text-center text-xl opacity-70 py-10">Loading challenges...</div>}
+      {!isLoadingChallenges && allImages.length === 0 ? (
         <div className="text-center text-xl opacity-70 py-10">
           <p>No image challenges yet. Be the first to create one!</p>
         </div>
