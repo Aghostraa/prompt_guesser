@@ -56,7 +56,7 @@ const Home: NextPage = () => {
               </div>
               <div className="flex items-center gap-2 text-sm opacity-70">
                 <span>Created by:</span>
-                <Address address={image.creator} />
+                <Address address={image.creator} disableAddressLink={true} />
               </div>
             </div>
           </Link>

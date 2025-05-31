@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { use, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
@@ -10,6 +10,11 @@ interface Guess {
   address: string;
   guess: string;
   timestamp: number;
+}
+
+// Define an interface for the resolved params
+interface PageParams {
+  id: string;
 }
 
 // Temporary mock data
@@ -32,10 +37,15 @@ const getMockImage = (id: string) => ({
   ] as Guess[],
 });
 
-const GuessPage = ({ params }: { params: { id: string } }) => {
+// Update the params prop type to Promise<PageParams>
+const GuessPage = ({ params: paramsPromise }: { params: Promise<PageParams> }) => {
+  // Unwrap the promise using React.use()
+  const resolvedParams = use(paramsPromise);
+
   const [guess, setGuess] = useState("");
   const [guessAmount, setGuessAmount] = useState("");
-  const mockImage = getMockImage(params.id);
+  // Access id from the resolved params
+  const mockImage = getMockImage(resolvedParams.id);
 
   const handleSubmitGuess = async (e: React.FormEvent) => {
     e.preventDefault();
