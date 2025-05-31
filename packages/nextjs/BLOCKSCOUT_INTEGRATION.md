@@ -9,24 +9,30 @@ The leaderboard system currently uses mock data and needs to be integrated with 
 ## Required API Endpoints
 
 ### 1. Contract Event Logs
+
 ```
 GET /api/v2/addresses/{contractAddress}/logs
 ```
+
 **Purpose**: Fetch all event logs from the contract to parse game-related events.
 
 **Parameters**:
+
 - `contractAddress`: The deployed game contract address
 - `from_block`: Starting block number (optional)
 - `to_block`: Ending block number (optional)
 - `topic0`: Event signature hash (optional, for filtering specific events)
 
 ### 2. Address Transactions
+
 ```
 GET /api/v2/addresses/{address}/transactions
 ```
+
 **Purpose**: Get all transactions for a specific player address.
 
 **Parameters**:
+
 - `address`: Player's wallet address
 - `filter`: Transaction type filter
 - `type`: Include internal transactions
@@ -34,6 +40,7 @@ GET /api/v2/addresses/{address}/transactions
 ## Event Types to Parse
 
 ### ChallengeCreated Event
+
 ```solidity
 event ChallengeCreated(
     uint256 indexed challengeId,
@@ -42,9 +49,11 @@ event ChallengeCreated(
     uint256 initialPrizePool
 );
 ```
+
 **Usage**: Track challenge creators and total challenges created per user.
 
 ### GuessMade Event
+
 ```solidity
 event GuessMade(
     uint256 indexed challengeId,
@@ -53,9 +62,11 @@ event GuessMade(
     bool isCorrect
 );
 ```
+
 **Usage**: Track wins/losses and calculate win rates.
 
 ### PrizeAwarded Event
+
 ```solidity
 event PrizeAwarded(
     uint256 indexed challengeId,
@@ -63,11 +74,13 @@ event PrizeAwarded(
     uint256 amount
 );
 ```
+
 **Usage**: Calculate total prize money won by each player.
 
 ## Implementation Structure
 
 ### 1. API Service Layer
+
 Create `services/blockscout.ts`:
 
 ```typescript
@@ -99,6 +112,7 @@ class BlockscoutService {
 ```
 
 ### 2. Event Parser
+
 Create `utils/eventParser.ts`:
 
 ```typescript
@@ -144,6 +158,7 @@ class EventParser {
 ```
 
 ### 3. Leaderboard Calculator
+
 Create `utils/leaderboardCalculator.ts`:
 
 ```typescript
@@ -168,7 +183,7 @@ class LeaderboardCalculator {
   static calculatePlayerStats(
     challengeEvents: ParsedChallengeCreated[],
     guessEvents: ParsedGuessMade[],
-    prizeEvents: ParsedPrizeAwarded[]
+    prizeEvents: ParsedPrizeAwarded[],
   ): Map<string, PlayerStats> {
     // Aggregate all events by player address
     // Calculate statistics for each player
@@ -176,8 +191,8 @@ class LeaderboardCalculator {
 
   static generateLeaderboard(
     playerStats: Map<string, PlayerStats>,
-    sortBy: 'wins' | 'prizes' = 'wins',
-    limit?: number
+    sortBy: "wins" | "prizes" = "wins",
+    limit?: number,
   ): LeaderboardEntry[] {
     // Sort players by the specified criteria
     // Return top N players
@@ -186,11 +201,12 @@ class LeaderboardCalculator {
 ```
 
 ### 4. React Hooks
+
 Create `hooks/useLeaderboard.ts`:
 
 ```typescript
 interface UseLeaderboardOptions {
-  sortBy?: 'wins' | 'prizes';
+  sortBy?: "wins" | "prizes";
   limit?: number;
   refreshInterval?: number;
 }
@@ -212,18 +228,21 @@ export function useLeaderboard(options: UseLeaderboardOptions = {}): UseLeaderbo
 ## Implementation Steps
 
 ### Phase 1: Basic Integration
+
 1. ✅ Set up Blockscout service class
 2. ✅ Implement event log fetching
 3. ✅ Create event parser for basic events
 4. ✅ Replace mock data in leaderboard components
 
 ### Phase 2: Advanced Features
+
 1. ✅ Add caching layer for performance
 2. ✅ Implement real-time updates using WebSocket or polling
 3. ✅ Add pagination for large datasets
 4. ✅ Optimize queries with block range filtering
 
 ### Phase 3: Enhanced Analytics
+
 1. ✅ Add player streak tracking
 2. ✅ Calculate win rates and performance metrics
 3. ✅ Historical leaderboard snapshots
@@ -294,4 +313,4 @@ export default function LeaderboardPage() {
 }
 ```
 
-This integration will provide real-time, accurate leaderboard data directly from the blockchain via Blockscout APIs. 
+This integration will provide real-time, accurate leaderboard data directly from the blockchain via Blockscout APIs.

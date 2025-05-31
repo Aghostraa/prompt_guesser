@@ -4,9 +4,9 @@ import { ThemeProvider } from "~~/components/ThemeProvider";
 import "~~/styles/globals.css";
 import { getMetadata } from "~~/utils/scaffold-eth/getMetadata";
 
-export const metadata = getMetadata({ 
-  title: "Prompt Guesser - AI Image Guessing Game", 
-  description: "Guess AI-generated image prompts and win ETH rewards in this exciting blockchain game!" 
+export const metadata = getMetadata({
+  title: "Prompt Guesser - AI Image Guessing Game",
+  description: "Guess AI-generated image prompts and win ETH rewards in this exciting blockchain game!",
 });
 
 const ScaffoldEthApp = ({ children }: { children: React.ReactNode }) => {

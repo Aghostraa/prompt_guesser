@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { NextPage } from "next";
 import { formatEther } from "viem";
+import { hardhat } from "viem/chains";
 import {
   BanknotesIcon,
   ClockIcon,
@@ -14,12 +15,15 @@ import {
   TrophyIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
-import { BanknotesIcon as BanknotesIconSolid, SparklesIcon as SparklesIconSolid, ExclamationTriangleIcon } from "@heroicons/react/24/solid";
+import {
+  BanknotesIcon as BanknotesIconSolid,
+  ExclamationTriangleIcon,
+  SparklesIcon as SparklesIconSolid,
+} from "@heroicons/react/24/solid";
+import { LeaderboardWidget } from "~~/components/LeaderboardWidget";
 import { Address } from "~~/components/scaffold-eth";
 import { useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
-import { hardhat } from "viem/chains";
-import { LeaderboardWidget } from "~~/components/LeaderboardWidget";
 
 interface ImagePost {
   id: bigint;
@@ -32,7 +36,7 @@ interface ImagePost {
 const Home: NextPage = () => {
   const [allImages, setAllImages] = useState<ImagePost[]>([]);
   const [isLoadingChallenges, setIsLoadingChallenges] = useState(true);
-  const [activeTab, setActiveTab] = useState<'active' | 'solved'>('active');
+  const [activeTab, setActiveTab] = useState<"active" | "solved">("active");
 
   const { data: challengeEvents, isLoading: isLoadingEvents } = useScaffoldEventHistory({
     contractName: "YourContract",
@@ -52,7 +56,7 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     setIsLoadingChallenges(isLoadingEvents);
-    
+
     // Handle case where contract might not exist on the network
     if (challengeEvents) {
       try {
@@ -61,26 +65,26 @@ const Home: NextPage = () => {
             // Add comprehensive safety checks for event structure
             if (
               !event?.args ||
-              typeof event.args !== 'object' ||
+              typeof event.args !== "object" ||
               event.args.challengeId === undefined ||
               event.args.imageUrl === undefined ||
               event.args.creator === undefined ||
-              typeof event.args.creator !== 'string' ||
+              typeof event.args.creator !== "string" ||
               !event.args.creator.startsWith("0x")
             ) {
-              console.warn('Invalid event structure:', event);
+              console.warn("Invalid event structure:", event);
               return null;
             }
-            
+
             // Check if this challenge has been solved with safety checks
             const correctGuess = guessEvents?.find(
-              guess => 
-                guess?.args && 
-                typeof guess.args === 'object' &&
-                guess.args.challengeId === event.args.challengeId && 
-                guess.args.isCorrect === true
+              guess =>
+                guess?.args &&
+                typeof guess.args === "object" &&
+                guess.args.challengeId === event.args.challengeId &&
+                guess.args.isCorrect === true,
             );
-            
+
             return {
               id: event.args.challengeId,
               imageUrl: event.args.imageUrl,
@@ -91,10 +95,10 @@ const Home: NextPage = () => {
           })
           .filter((challenge): challenge is ImagePost & { isActive: boolean } => challenge !== null)
           .sort((a, b) => Number(b.id) - Number(a.id));
-        
+
         setAllImages(formattedChallenges);
       } catch (error) {
-        console.error('Error processing challenge events:', error);
+        console.error("Error processing challenge events:", error);
         // Set empty array to prevent UI crashes
         setAllImages([]);
       }
@@ -107,7 +111,7 @@ const Home: NextPage = () => {
   // Filter challenges based on active tab
   const activeChallenges = allImages.filter(image => (image as any).isActive);
   const solvedChallenges = allImages.filter(image => !(image as any).isActive);
-  const displayedChallenges = activeTab === 'active' ? activeChallenges : solvedChallenges;
+  const displayedChallenges = activeTab === "active" ? activeChallenges : solvedChallenges;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-purple-950 dark:to-indigo-950">
@@ -117,7 +121,7 @@ const Home: NextPage = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 via-blue-400/10 to-indigo-400/10" />
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-300/20 rounded-full blur-3xl animate-pulse" />
         <div className="absolute top-32 right-1/4 w-80 h-80 bg-blue-300/20 rounded-full blur-3xl animate-pulse delay-700" />
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-12">
             {/* Badge and Main heading */}
@@ -128,18 +132,20 @@ const Home: NextPage = () => {
                   <span>Blockchain-Powered AI Game</span>
                 </div>
               </div>
-              
+
               <div className="space-y-6">
                 <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black text-white leading-tight tracking-tight drop-shadow-2xl">
                   <span className="block drop-shadow-lg">Prompt Genius</span>
                 </h1>
-                
+
                 <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed font-medium">
-                  The ultimate AI prompt guessing game on the blockchain. Create stunning AI images, challenge the community, and win FLOW rewards!
+                  The ultimate AI prompt guessing game on the blockchain. Create stunning AI images, challenge the
+                  community, and win FLOW rewards!
                 </p>
-                
+
                 <p className="text-lg text-gray-500 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
-                  Test your creativity and intuition by guessing the prompts behind AI-generated masterpieces. Guessing fee is 10% of the prize pool (in FLOW), with fees distributed to the creator and platform.
+                  Test your creativity and intuition by guessing the prompts behind AI-generated masterpieces. Guessing
+                  fee is 10% of the prize pool (in FLOW), with fees distributed to the creator and platform.
                 </p>
               </div>
             </div>
@@ -156,7 +162,7 @@ const Home: NextPage = () => {
                     <div className="text-sm text-gray-600 dark:text-gray-400">Active Challenges</div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl px-6 py-4 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300">
                   <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center">
                     <TrophyIcon className="w-6 h-6 text-green-500" />
@@ -166,7 +172,7 @@ const Home: NextPage = () => {
                     <div className="text-sm text-gray-600 dark:text-gray-400">Solved Challenges</div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-3 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl px-6 py-4 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300">
                   <div className="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center">
                     <BanknotesIconSolid className="w-6 h-6 text-yellow-500" />
@@ -184,19 +190,17 @@ const Home: NextPage = () => {
             {/* CTA Section */}
             <div className="pt-12">
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link 
-                  href="/create" 
+                <Link
+                  href="/create"
                   className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-white bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl hover:from-purple-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-purple-500/25"
                 >
                   <PlusIcon className="w-6 h-6 mr-2 group-hover:rotate-90 transition-transform duration-300" />
                   Create Challenge
                   <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </Link>
-                
+
                 <div className="text-center sm:text-left space-y-1">
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    or scroll down to start guessing
-                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">or scroll down to start guessing</p>
                   <p className="text-xs text-gray-500 dark:text-gray-500">
                     Dynamic FLOW fee per guess • Winner takes prize
                   </p>
@@ -211,25 +215,15 @@ const Home: NextPage = () => {
       <section className="relative py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-4">
-              Hall of Fame
-            </h2>
+            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-4">Hall of Fame</h2>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               See who&apos;s dominating the prompt guessing arena. Will you be next?
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <LeaderboardWidget 
-              title="Top Winners" 
-              maxItems={5} 
-              showByPrizes={false} 
-            />
-            <LeaderboardWidget 
-              title="Top Earners" 
-              maxItems={5} 
-              showByPrizes={true} 
-            />
+            <LeaderboardWidget title="Top Winners" maxItems={5} showByPrizes={false} />
+            <LeaderboardWidget title="Top Earners" maxItems={5} showByPrizes={true} />
           </div>
         </div>
       </section>
@@ -240,11 +234,10 @@ const Home: NextPage = () => {
           {/* Section Header with Tabs */}
           <div className="flex flex-col items-center space-y-12 mb-16">
             <div className="text-center space-y-4">
-              <h2 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white">
-                Explore Challenges
-              </h2>
+              <h2 className="text-4xl sm:text-5xl font-black text-gray-900 dark:text-white">Explore Challenges</h2>
               <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
-                Dive into our collection of AI-generated puzzles. Test your skills against active challenges or learn from solved masterpieces.
+                Dive into our collection of AI-generated puzzles. Test your skills against active challenges or learn
+                from solved masterpieces.
               </p>
             </div>
 
@@ -252,11 +245,11 @@ const Home: NextPage = () => {
             <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-2 border border-white/20 shadow-lg">
               <div className="flex space-x-2">
                 <button
-                  onClick={() => setActiveTab('active')}
+                  onClick={() => setActiveTab("active")}
                   className={`px-8 py-4 rounded-xl font-semibold transition-all duration-300 ${
-                    activeTab === 'active'
-                      ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg transform scale-105'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-white/50 dark:hover:bg-gray-700/50'
+                    activeTab === "active"
+                      ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg transform scale-105"
+                      : "text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-white/50 dark:hover:bg-gray-700/50"
                   }`}
                 >
                   <div className="flex items-center space-x-3">
@@ -267,13 +260,13 @@ const Home: NextPage = () => {
                     </div>
                   </div>
                 </button>
-                
+
                 <button
-                  onClick={() => setActiveTab('solved')}
+                  onClick={() => setActiveTab("solved")}
                   className={`px-8 py-4 rounded-xl font-semibold transition-all duration-300 ${
-                    activeTab === 'solved'
-                      ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg transform scale-105'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-white/50 dark:hover:bg-gray-700/50'
+                    activeTab === "solved"
+                      ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg transform scale-105"
+                      : "text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 hover:bg-white/50 dark:hover:bg-gray-700/50"
                   }`}
                 >
                   <div className="flex items-center space-x-3">
@@ -303,9 +296,7 @@ const Home: NextPage = () => {
                 <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full mb-8 animate-spin">
                   <SparklesIcon className="w-10 h-10 text-white" />
                 </div>
-                <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-                  Loading Challenges
-                </h3>
+                <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Loading Challenges</h3>
                 <p className="text-lg text-gray-600 dark:text-gray-400">
                   Fetching the latest AI masterpieces from the blockchain...
                 </p>
@@ -326,8 +317,8 @@ const Home: NextPage = () => {
                         Network Notice
                       </h4>
                       <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-4">
-                        No challenges found on <strong>{targetNetwork.name}</strong>. 
-                        The contract might not be deployed on this network yet.
+                        No challenges found on <strong>{targetNetwork.name}</strong>. The contract might not be deployed
+                        on this network yet.
                       </p>
                       <p className="text-xs text-yellow-600 dark:text-yellow-400">
                         Try switching to a supported network or check if the contract is deployed.
@@ -337,26 +328,25 @@ const Home: NextPage = () => {
                 )}
 
                 <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/20 dark:to-blue-900/20 rounded-full mb-8">
-                  {activeTab === 'active' ? (
+                  {activeTab === "active" ? (
                     <PhotoIcon className="w-12 h-12 text-purple-500" />
                   ) : (
                     <TrophyIcon className="w-12 h-12 text-green-500" />
                   )}
                 </div>
-                
+
                 <h3 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
-                  {activeTab === 'active' ? 'No Active Challenges' : 'No Solved Challenges Yet'}
+                  {activeTab === "active" ? "No Active Challenges" : "No Solved Challenges Yet"}
                 </h3>
-                
+
                 <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-lg mx-auto leading-relaxed">
-                  {activeTab === 'active' 
-                    ? 'Be the pioneer! Create the first AI image challenge and ignite the guessing game revolution.'
-                    : 'The community is still working on cracking these puzzles. Check back soon to see the first winners!'
-                  }
+                  {activeTab === "active"
+                    ? "Be the pioneer! Create the first AI image challenge and ignite the guessing game revolution."
+                    : "The community is still working on cracking these puzzles. Check back soon to see the first winners!"}
                 </p>
-                
-                {activeTab === 'active' && (
-                  <Link 
+
+                {activeTab === "active" && (
+                  <Link
                     href="/create"
                     className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                   >
@@ -372,13 +362,12 @@ const Home: NextPage = () => {
               <>
                 <div className="text-center mb-12">
                   <p className="text-lg text-gray-600 dark:text-gray-400">
-                    {activeTab === 'active' 
-                      ? `${displayedChallenges.length} challenge${displayedChallenges.length !== 1 ? 's' : ''} ready for your genius`
-                      : `${displayedChallenges.length} challenge${displayedChallenges.length !== 1 ? 's' : ''} already mastered`
-                    }
+                    {activeTab === "active"
+                      ? `${displayedChallenges.length} challenge${displayedChallenges.length !== 1 ? "s" : ""} ready for your genius`
+                      : `${displayedChallenges.length} challenge${displayedChallenges.length !== 1 ? "s" : ""} already mastered`}
                   </p>
                 </div>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                   {displayedChallenges.map((image, index) => (
                     <Link
@@ -396,21 +385,23 @@ const Home: NextPage = () => {
                       <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl overflow-hidden border border-white/20 hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2">
                         {/* Image */}
                         <div className="relative aspect-square overflow-hidden">
-                          <Image 
-                            src={image.imageUrl} 
-                            alt={image.prompt || "AI Generated Challenge"} 
-                            fill 
+                          <Image
+                            src={image.imageUrl}
+                            alt={image.prompt || "AI Generated Challenge"}
+                            fill
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                            className="object-cover transition-transform duration-500 group-hover:scale-110" 
+                            className="object-cover transition-transform duration-500 group-hover:scale-110"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                          
+
                           {/* Status Badge */}
-                          <div className={`absolute top-4 right-4 ${
-                            (image as any).isActive 
-                              ? 'bg-gradient-to-r from-green-500 to-emerald-500' 
-                              : 'bg-gradient-to-r from-purple-500 to-indigo-500'
-                          } text-white px-3 py-2 rounded-full text-sm font-bold shadow-lg backdrop-blur-sm`}>
+                          <div
+                            className={`absolute top-4 right-4 ${
+                              (image as any).isActive
+                                ? "bg-gradient-to-r from-green-500 to-emerald-500"
+                                : "bg-gradient-to-r from-purple-500 to-indigo-500"
+                            } text-white px-3 py-2 rounded-full text-sm font-bold shadow-lg backdrop-blur-sm`}
+                          >
                             <div className="flex items-center space-x-1">
                               {(image as any).isActive ? (
                                 <>
@@ -454,7 +445,7 @@ const Home: NextPage = () => {
                             <div className="flex items-center space-x-1 text-purple-500">
                               <SparklesIcon className="w-4 h-4" />
                               <span className="text-sm font-medium">
-                                {(image as any).isActive ? 'Guess & Win' : 'View Solution'}
+                                {(image as any).isActive ? "Guess & Win" : "View Solution"}
                               </span>
                             </div>
                           </div>

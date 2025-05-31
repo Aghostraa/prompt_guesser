@@ -3,7 +3,7 @@
 import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { formatEther, parseEther } from "viem";
+import { formatEther } from "viem";
 import { useAccount, useBalance } from "wagmi";
 import {
   ArrowLeftIcon,
@@ -59,7 +59,7 @@ const GuessPage = ({ params: paramsPromise }: { params: Promise<PageParams> }) =
 
   const challengeIdBigInt = resolvedParams.id ? BigInt(resolvedParams.id) : undefined;
 
-  const { data: fetchedChallengeData, isLoading: isLoadingChallengeDetails, refetch: refetchChallengeDetails } = useScaffoldReadContract({
+  const { data: fetchedChallengeData, isLoading: isLoadingChallengeDetails } = useScaffoldReadContract({
     contractName: "YourContract",
     functionName: "getChallenge",
     args: [challengeIdBigInt],
@@ -117,8 +117,8 @@ const GuessPage = ({ params: paramsPromise }: { params: Promise<PageParams> }) =
 
       const formattedGuesses = guessEvents
         .map(event => {
-          if (!event?.args || typeof event.args !== 'object') {
-            console.warn('Invalid guess event structure:', event);
+          if (!event?.args || typeof event.args !== "object") {
+            console.warn("Invalid guess event structure:", event);
             return null;
           }
           const blockTimestamp = (event as any).blockTimestamp;
@@ -282,7 +282,7 @@ const GuessPage = ({ params: paramsPromise }: { params: Promise<PageParams> }) =
               <div className="text-center">
                 <div className="text-lg font-bold">🎉 Challenge Solved!</div>
                 <div className="text-sm opacity-90">
-                  Winner: <Address address={correctGuess.address} /> 
+                  Winner: <Address address={correctGuess.address} />
                   {" • "}
                   Winning prompt: &quot;{correctGuess.guess}&quot;
                 </div>

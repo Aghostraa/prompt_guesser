@@ -5,12 +5,14 @@ This application now uses OpenAI's DALL-E API to generate images from text promp
 ## Setup Instructions
 
 1. **Get an OpenAI API Key:**
+
    - Visit [OpenAI Platform](https://platform.openai.com/api-keys)
    - Create an account or sign in
    - Generate a new API key
 
 2. **Configure Environment Variables:**
    Create a `.env.local` file in the `packages/nextjs` directory with:
+
    ```
    OPENAI_API_KEY=your_actual_api_key_here
    ```
@@ -31,6 +33,7 @@ This application now uses OpenAI's DALL-E API to generate images from text promp
 ## API Usage
 
 The application makes requests to `/api/generate-image` which:
+
 - Accepts a `prompt` in the request body
 - Returns the generated image URL
 - Handles errors gracefully
@@ -39,4 +42,4 @@ The application makes requests to `/api/generate-image` which:
 
 - Make sure your OpenAI API key has sufficient credits
 - Check that the API key is correctly set in `.env.local`
-- Ensure you have a stable internet connection for API calls 
+- Ensure you have a stable internet connection for API calls
