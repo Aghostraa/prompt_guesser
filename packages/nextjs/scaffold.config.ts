@@ -13,7 +13,12 @@ export const DEFAULT_ALCHEMY_API_KEY = "oKxs-03sij-U_N0iOlrSsZFr29-IqbuF";
 
 const scaffoldConfig = {
   // The networks on which your DApp is live
-  targetNetworks: [chains.hardhat],
+  targetNetworks: [
+    chains.hardhat,
+    chains.flowTestnet,     // Flow EVM Testnet
+    chains.flowMainnet,     // Flow EVM Mainnet
+    // chains.flowPreviewnet,  // Flow EVM Previewnet (uncomment if needed)
+  ],
 
   // The interval at which your front-end polls the RPC servers for new data
   // it has no effect if you only target the local network (default is 4000)
@@ -30,6 +35,8 @@ const scaffoldConfig = {
   rpcOverrides: {
     // Example:
     // [chains.mainnet.id]: "https://mainnet.buidlguidl.com",
+    [chains.flowTestnet.id]: "https://testnet.evm.nodes.onflow.org",
+    [chains.flowMainnet.id]: "https://mainnet.evm.nodes.onflow.org",
   },
 
   // This is ours WalletConnect's default project ID.
