@@ -97,37 +97,58 @@ const GuessPage = ({ params: paramsPromise }: { params: Promise<PageParams> }) =
     if (guessEvents && fetchedChallengeData) {
       const contractData = fetchedChallengeData as any;
 
-      const formattedGuesses = guessEvents.map(event => {
-        const blockTimestamp = (event as any).blockTimestamp;
-        return {
-          address: event.args.guesser as `0x${string}`,
-          guess: event.args.guessString || "",
-          timestamp: blockTimestamp ? Number(blockTimestamp) * 1000 : Date.now(),
-          isCorrect: event.args.isCorrect,
-        };
-      });
+      try {
+        const formattedGuesses = guessEvents
+          .map(event => {
+            // Add safety checks for event structure
+            if (!event?.args || typeof event.args !== 'object') {
+              console.warn('Invalid guess event structure:', event);
+              return null;
+            }
 
-      let calculatedPrizePoolWei = contractData.prizePool !== undefined ? BigInt(contractData.prizePool) : BigInt(0);
-      let calculatedIsActive = contractData.isActive !== undefined ? contractData.isActive : true;
+            const blockTimestamp = (event as any).blockTimestamp;
+            return {
+              address: event.args.guesser as `0x${string}`,
+              guess: event.args.guessString || "",
+              timestamp: blockTimestamp ? Number(blockTimestamp) * 1000 : Date.now(),
+              isCorrect: event.args.isCorrect,
+            } as Guess;
+          })
+          .filter((guess): guess is Guess => guess !== null);
 
-      for (const event of guessEvents) {
-        if (event.args.isCorrect) {
-          calculatedPrizePoolWei = BigInt(0);
-          calculatedIsActive = false;
-          break;
-        } else {
-          calculatedPrizePoolWei += parseEther(FIXED_GUESS_FEE_ETH);
+        let calculatedPrizePoolWei = contractData.prizePool !== undefined ? BigInt(contractData.prizePool) : BigInt(0);
+        let calculatedIsActive = contractData.isActive !== undefined ? contractData.isActive : true;
+
+        for (const event of guessEvents) {
+          if (event?.args && event.args.isCorrect) {
+            calculatedPrizePoolWei = BigInt(0);
+            calculatedIsActive = false;
+            break;
+          } else if (event?.args) {
+            calculatedPrizePoolWei += parseEther(FIXED_GUESS_FEE_ETH);
+          }
         }
-      }
 
-      setChallengeData({
-        id: contractData.id.toString(),
-        imageUrl: contractData.imageUrl,
-        creator: contractData.creator as `0x${string}`,
-        guesses: formattedGuesses.sort((a, b) => b.timestamp - a.timestamp),
-        prizePool: formatEther(calculatedPrizePoolWei),
-        isActive: calculatedIsActive,
-      });
+        setChallengeData({
+          id: contractData.id.toString(),
+          imageUrl: contractData.imageUrl,
+          creator: contractData.creator as `0x${string}`,
+          guesses: formattedGuesses.sort((a, b) => b.timestamp - a.timestamp),
+          prizePool: formatEther(calculatedPrizePoolWei),
+          isActive: calculatedIsActive,
+        });
+      } catch (error) {
+        console.error('Error processing guess events:', error);
+        // Fallback to basic challenge data without guesses
+        setChallengeData({
+          id: contractData.id.toString(),
+          imageUrl: contractData.imageUrl,
+          creator: contractData.creator as `0x${string}`,
+          guesses: [],
+          prizePool: contractData.prizePool ? formatEther(contractData.prizePool) : "0",
+          isActive: contractData.isActive !== undefined ? contractData.isActive : true,
+        });
+      }
     }
   }, [guessEvents, fetchedChallengeData]);
 

@@ -13,10 +13,13 @@ import {
   SparklesIcon,
   TrophyIcon,
   UserGroupIcon,
+  EyeIcon,
 } from "@heroicons/react/24/outline";
-import { BanknotesIcon as BanknotesIconSolid, SparklesIcon as SparklesIconSolid } from "@heroicons/react/24/solid";
+import { BanknotesIcon as BanknotesIconSolid, SparklesIcon as SparklesIconSolid, ExclamationTriangleIcon } from "@heroicons/react/24/solid";
 import { Address } from "~~/components/scaffold-eth";
 import { useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
+import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
+import { hardhat } from "viem/chains";
 
 interface ImagePost {
   id: bigint;
@@ -45,36 +48,59 @@ const Home: NextPage = () => {
     watch: true,
   });
 
+  const { targetNetwork } = useTargetNetwork();
+
   useEffect(() => {
     setIsLoadingChallenges(isLoadingEvents);
+    
+    // Handle case where contract might not exist on the network
     if (challengeEvents) {
-      const formattedChallenges = challengeEvents
-        .map(event => {
-          if (
-            event.args.challengeId === undefined ||
-            event.args.imageUrl === undefined ||
-            event.args.creator === undefined ||
-            !event.args.creator.startsWith("0x")
-          ) {
-            return null;
-          }
-          
-          // Check if this challenge has been solved
-          const correctGuess = guessEvents?.find(
-            guess => guess.args.challengeId === event.args.challengeId && guess.args.isCorrect === true
-          );
-          
-          return {
-            id: event.args.challengeId,
-            imageUrl: event.args.imageUrl,
-            prizePool: event.args.initialPrizePool ? formatEther(event.args.initialPrizePool) : "0",
-            creator: event.args.creator as `0x${string}`,
-            isActive: !correctGuess, // Challenge is active if no correct guess exists
-          };
-        })
-        .filter((challenge): challenge is ImagePost & { isActive: boolean } => challenge !== null)
-        .sort((a, b) => Number(b.id) - Number(a.id));
-      setAllImages(formattedChallenges);
+      try {
+        const formattedChallenges = challengeEvents
+          .map(event => {
+            // Add comprehensive safety checks for event structure
+            if (
+              !event?.args ||
+              typeof event.args !== 'object' ||
+              event.args.challengeId === undefined ||
+              event.args.imageUrl === undefined ||
+              event.args.creator === undefined ||
+              typeof event.args.creator !== 'string' ||
+              !event.args.creator.startsWith("0x")
+            ) {
+              console.warn('Invalid event structure:', event);
+              return null;
+            }
+            
+            // Check if this challenge has been solved with safety checks
+            const correctGuess = guessEvents?.find(
+              guess => 
+                guess?.args && 
+                typeof guess.args === 'object' &&
+                guess.args.challengeId === event.args.challengeId && 
+                guess.args.isCorrect === true
+            );
+            
+            return {
+              id: event.args.challengeId,
+              imageUrl: event.args.imageUrl,
+              prizePool: event.args.initialPrizePool ? formatEther(event.args.initialPrizePool) : "0",
+              creator: event.args.creator as `0x${string}`,
+              isActive: !correctGuess, // Challenge is active if no correct guess exists
+            };
+          })
+          .filter((challenge): challenge is ImagePost & { isActive: boolean } => challenge !== null)
+          .sort((a, b) => Number(b.id) - Number(a.id));
+        
+        setAllImages(formattedChallenges);
+      } catch (error) {
+        console.error('Error processing challenge events:', error);
+        // Set empty array to prevent UI crashes
+        setAllImages([]);
+      }
+    } else {
+      // If no events, set empty array
+      setAllImages([]);
     }
   }, [challengeEvents, isLoadingEvents, guessEvents]);
 
@@ -274,6 +300,27 @@ const Home: NextPage = () => {
             {/* Empty State */}
             {!isLoadingChallenges && displayedChallenges.length === 0 && (
               <div className="text-center py-24">
+                {/* Network Status Alert for non-hardhat networks with no challenges */}
+                {!isLoadingEvents && challengeEvents?.length === 0 && targetNetwork.id !== hardhat.id && (
+                  <div className="mb-8 mx-auto max-w-md">
+                    <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/50 rounded-2xl p-6">
+                      <div className="flex items-center justify-center mb-4">
+                        <ExclamationTriangleIcon className="w-8 h-8 text-yellow-500" />
+                      </div>
+                      <h4 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+                        Network Notice
+                      </h4>
+                      <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-4">
+                        No challenges found on <strong>{targetNetwork.name}</strong>. 
+                        The contract might not be deployed on this network yet.
+                      </p>
+                      <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                        Try switching to a supported network or check if the contract is deployed.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/20 dark:to-blue-900/20 rounded-full mb-8">
                   {activeTab === 'active' ? (
                     <PhotoIcon className="w-12 h-12 text-purple-500" />
