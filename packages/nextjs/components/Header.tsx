@@ -123,7 +123,7 @@ export const Header = () => {
           </div>
 
           {/* Right side - Wallet Connection */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             {isLocalNetwork && (
               <div className="hidden sm:block">
                 <FaucetButton />

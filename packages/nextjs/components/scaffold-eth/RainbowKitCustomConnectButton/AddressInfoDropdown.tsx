@@ -49,47 +49,52 @@ export const AddressInfoDropdown = ({
   return (
     <>
       <details ref={dropdownRef} className="dropdown dropdown-end leading-3">
-        <summary className="btn btn-secondary btn-sm pl-0 pr-2 shadow-md dropdown-toggle gap-0 h-auto!">
-          <BlockieAvatar address={checkSumAddress} size={30} ensImage={ensAvatar} />
-          <span className="ml-2 mr-1">
-            {isENS(displayName) ? displayName : checkSumAddress?.slice(0, 6) + "..." + checkSumAddress?.slice(-4)}
-          </span>
-          <ChevronDownIcon className="h-6 w-4 ml-2 sm:ml-0" />
+        <summary className="flex items-center space-x-2 px-3 py-2 cursor-pointer hover:bg-white/50 dark:hover:bg-gray-700/50 rounded-2xl transition-all duration-300">
+          <BlockieAvatar address={checkSumAddress} size={32} ensImage={ensAvatar} />
+          <div className="flex flex-col items-start">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {isENS(displayName) ? displayName : checkSumAddress?.slice(0, 6) + "..." + checkSumAddress?.slice(-4)}
+            </span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              Wallet
+            </span>
+          </div>
+          <ChevronDownIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
         </summary>
-        <ul className="dropdown-content menu z-2 p-2 mt-2 shadow-center shadow-accent bg-base-200 rounded-box gap-1">
+        <ul className="dropdown-content menu z-[100] p-2 mt-2 shadow-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg border border-white/20 dark:border-gray-600/20 rounded-2xl w-64 gap-1">
           <NetworkOptions hidden={!selectingNetwork} />
           <li className={selectingNetwork ? "hidden" : ""}>
             <div
-              className="h-8 btn-sm rounded-xl! flex gap-3 py-3 cursor-pointer"
+              className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl cursor-pointer transition-colors"
               onClick={() => copyAddressToClipboard(checkSumAddress)}
             >
               {isAddressCopiedToClipboard ? (
                 <>
-                  <CheckCircleIcon className="text-xl font-normal h-6 w-4 ml-2 sm:ml-0" aria-hidden="true" />
-                  <span className="whitespace-nowrap">Copied!</span>
+                  <CheckCircleIcon className="h-5 w-5 text-green-500" aria-hidden="true" />
+                  <span className="text-sm font-medium">Copied!</span>
                 </>
               ) : (
                 <>
-                  <DocumentDuplicateIcon className="text-xl font-normal h-6 w-4 ml-2 sm:ml-0" aria-hidden="true" />
-                  <span className="whitespace-nowrap">Copy address</span>
+                  <DocumentDuplicateIcon className="h-5 w-5 text-gray-500" aria-hidden="true" />
+                  <span className="text-sm font-medium">Copy address</span>
                 </>
               )}
             </div>
           </li>
           <li className={selectingNetwork ? "hidden" : ""}>
-            <label htmlFor="qrcode-modal" className="h-8 btn-sm rounded-xl! flex gap-3 py-3">
-              <QrCodeIcon className="h-6 w-4 ml-2 sm:ml-0" />
-              <span className="whitespace-nowrap">View QR Code</span>
+            <label htmlFor="qrcode-modal" className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl cursor-pointer transition-colors">
+              <QrCodeIcon className="h-5 w-5 text-gray-500" />
+              <span className="text-sm font-medium">View QR Code</span>
             </label>
           </li>
           <li className={selectingNetwork ? "hidden" : ""}>
-            <button className="h-8 btn-sm rounded-xl! flex gap-3 py-3" type="button">
-              <ArrowTopRightOnSquareIcon className="h-6 w-4 ml-2 sm:ml-0" />
+            <button className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl cursor-pointer transition-colors w-full text-left" type="button">
+              <ArrowTopRightOnSquareIcon className="h-5 w-5 text-gray-500" />
               <a
                 target="_blank"
                 href={blockExplorerAddressLink}
                 rel="noopener noreferrer"
-                className="whitespace-nowrap"
+                className="text-sm font-medium"
               >
                 View on Block Explorer
               </a>
@@ -98,23 +103,26 @@ export const AddressInfoDropdown = ({
           {allowedNetworks.length > 1 ? (
             <li className={selectingNetwork ? "hidden" : ""}>
               <button
-                className="h-8 btn-sm rounded-xl! flex gap-3 py-3"
+                className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl cursor-pointer transition-colors w-full text-left"
                 type="button"
                 onClick={() => {
                   setSelectingNetwork(true);
                 }}
               >
-                <ArrowsRightLeftIcon className="h-6 w-4 ml-2 sm:ml-0" /> <span>Switch Network</span>
+                <ArrowsRightLeftIcon className="h-5 w-5 text-gray-500" />
+                <span className="text-sm font-medium">Switch Network</span>
               </button>
             </li>
           ) : null}
+          <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
           <li className={selectingNetwork ? "hidden" : ""}>
             <button
-              className="menu-item text-error h-8 btn-sm rounded-xl! flex gap-3 py-3"
+              className="flex items-center gap-3 px-3 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl cursor-pointer transition-colors w-full text-left text-red-500"
               type="button"
               onClick={() => disconnect()}
             >
-              <ArrowLeftOnRectangleIcon className="h-6 w-4 ml-2 sm:ml-0" /> <span>Disconnect</span>
+              <ArrowLeftOnRectangleIcon className="h-5 w-5" />
+              <span className="text-sm font-medium">Disconnect</span>
             </button>
           </li>
         </ul>

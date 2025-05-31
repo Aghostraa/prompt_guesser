@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
     return config;
   },
   images: {
-    domains: ["picsum.photos"],
+    domains: ["picsum.photos", "oaidalleapiprodscus.blob.core.windows.net"],
   },
 };
 

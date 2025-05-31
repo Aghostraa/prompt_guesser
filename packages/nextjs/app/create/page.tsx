@@ -60,11 +60,34 @@ const CreatePage = () => {
     setIsGenerating(true);
     setCurrentStep(2);
     
-    setTimeout(() => {
-      setGeneratedImageLocalPath("/images/test_image.jpg");
+    try {
+      const response = await fetch('/api/generate-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate image');
+      }
+
+      if (data.success && data.imageUrl) {
+        setGeneratedImageLocalPath(data.imageUrl);
+        setCurrentStep(3);
+      } else {
+        throw new Error('Invalid response from image generation API');
+      }
+    } catch (error) {
+      console.error('Error generating image:', error);
+      setNotification(`Error: ${error instanceof Error ? error.message : 'Failed to generate image'}`);
+      setCurrentStep(1); // Go back to step 1 on error
+    } finally {
       setIsGenerating(false);
-      setCurrentStep(3);
-    }, 1500);
+    }
   };
 
   const handleSubmitChallenge = async (e: React.FormEvent) => {
@@ -82,13 +105,13 @@ const CreatePage = () => {
       const promptBytes = stringToBytes(prompt.toLowerCase().trim());
       const hashedPrompt = keccak256(promptBytes);
       console.log("Hashed prompt:", hashedPrompt);
-      console.log("Image URL:", "/images/test_image.jpg");
+      console.log("Image URL:", generatedImageLocalPath);
       console.log("Initial Prize Pool (argument to contract _initialPrizePool):", "0");
       console.log("Transaction Value (msg.value):", txValue);
 
       await writeContractAsync({
         functionName: "createChallenge",
-        args: [hashedPrompt, "/images/test_image.jpg", parseEther("0")],
+        args: [hashedPrompt, generatedImageLocalPath, parseEther("0")],
         value: parseEther(txValue),
       });
 
