@@ -1,21 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { formatEther } from "viem";
-import {
-  TrophyIcon,
-  UserGroupIcon,
-  BanknotesIcon,
-  ArrowPathIcon,
-} from "@heroicons/react/24/outline";
-import { TrophyIcon as TrophyIconSolid, FireIcon as FireIconSolid } from "@heroicons/react/24/solid";
-import { Address } from "~~/components/scaffold-eth";
 import { useAccount } from "wagmi";
+import { ArrowPathIcon, BanknotesIcon, TrophyIcon, UserGroupIcon } from "@heroicons/react/24/outline";
+import { FireIcon as FireIconSolid, TrophyIcon as TrophyIconSolid } from "@heroicons/react/24/solid";
+import { Address } from "~~/components/scaffold-eth";
 import { BlockscoutService } from "~~/services/blockscout";
 import type { LeaderboardEntry } from "~~/services/blockscout";
 
 const LeaderboardPage = () => {
-  const [activeTab, setActiveTab] = useState<'wins' | 'prizes'>('wins');
+  const [activeTab, setActiveTab] = useState<"wins" | "prizes">("wins");
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,17 +21,17 @@ const LeaderboardPage = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       if (forceRefresh) {
         setRefreshing(true);
         BlockscoutService.clearCache();
       }
-      
+
       const data = await BlockscoutService.getLeaderboard(activeTab, !forceRefresh);
       setLeaderboardData(data);
     } catch (err) {
-      console.error('Error fetching leaderboard data:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch leaderboard data');
+      console.error("Error fetching leaderboard data:", err);
+      setError(err instanceof Error ? err.message : "Failed to fetch leaderboard data");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -116,7 +111,7 @@ const LeaderboardPage = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-purple-400/10 via-blue-400/10 to-indigo-400/10" />
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-300/20 rounded-full blur-3xl animate-pulse" />
         <div className="absolute top-32 right-1/4 w-80 h-80 bg-blue-300/20 rounded-full blur-3xl animate-pulse delay-700" />
-        
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-8">
             <div className="flex justify-center">
@@ -125,11 +120,11 @@ const LeaderboardPage = () => {
                 <span>Hall of Fame</span>
               </div>
             </div>
-            
+
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-white leading-tight tracking-tight drop-shadow-2xl">
               <span className="block drop-shadow-lg">Leaderboard</span>
             </h1>
-            
+
             <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed font-medium">
               Discover the champions of the prompt guessing realm. See who dominates the art of AI intuition.
             </p>
@@ -140,9 +135,7 @@ const LeaderboardPage = () => {
                 <div className="flex items-center space-x-3">
                   <UserGroupIcon className="w-8 h-8 text-purple-500" />
                   <div>
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {totalPlayers}
-                    </div>
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white">{totalPlayers}</div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">Total Players</div>
                   </div>
                 </div>
@@ -153,9 +146,7 @@ const LeaderboardPage = () => {
                   <div className="flex items-center space-x-3">
                     <TrophyIcon className="w-8 h-8 text-green-500" />
                     <div>
-                      <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                        Connected
-                      </div>
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white">Connected</div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">Your Status</div>
                     </div>
                   </div>
@@ -165,13 +156,13 @@ const LeaderboardPage = () => {
               {/* Cache Status Card */}
               <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl px-6 py-4 border border-white/20 shadow-lg">
                 <div className="flex items-center space-x-3">
-                  <div className={`w-3 h-3 rounded-full ${cacheStatus.cached ? 'bg-green-500' : 'bg-gray-400'}`} />
+                  <div className={`w-3 h-3 rounded-full ${cacheStatus.cached ? "bg-green-500" : "bg-gray-400"}`} />
                   <div>
                     <div className="text-sm font-medium text-gray-900 dark:text-white">
-                      {cacheStatus.cached ? 'Live Data' : 'Loading...'}
+                      {cacheStatus.cached ? "Live Data" : "Loading..."}
                     </div>
                     <div className="text-xs text-gray-600 dark:text-gray-400">
-                      {cacheStatus.age ? `Updated ${Math.floor(cacheStatus.age / 1000)}s ago` : 'Real-time'}
+                      {cacheStatus.age ? `Updated ${Math.floor(cacheStatus.age / 1000)}s ago` : "Real-time"}
                     </div>
                   </div>
                 </div>
@@ -190,11 +181,11 @@ const LeaderboardPage = () => {
               <div className="flex items-center space-x-2">
                 <div className="flex space-x-2">
                   <button
-                    onClick={() => setActiveTab('wins')}
+                    onClick={() => setActiveTab("wins")}
                     className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                      activeTab === 'wins'
-                        ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg transform scale-105'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400'
+                      activeTab === "wins"
+                        ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg transform scale-105"
+                        : "text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400"
                     }`}
                   >
                     <div className="flex items-center space-x-2">
@@ -202,13 +193,13 @@ const LeaderboardPage = () => {
                       <span>Top Winners</span>
                     </div>
                   </button>
-                  
+
                   <button
-                    onClick={() => setActiveTab('prizes')}
+                    onClick={() => setActiveTab("prizes")}
                     className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                      activeTab === 'prizes'
-                        ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg transform scale-105'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400'
+                      activeTab === "prizes"
+                        ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg transform scale-105"
+                        : "text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400"
                     }`}
                   >
                     <div className="flex items-center space-x-2">
@@ -225,7 +216,7 @@ const LeaderboardPage = () => {
                   className="p-3 rounded-xl text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-300 disabled:opacity-50"
                   title="Refresh data"
                 >
-                  <ArrowPathIcon className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+                  <ArrowPathIcon className={`w-5 h-5 ${refreshing ? "animate-spin" : ""}`} />
                 </button>
               </div>
             </div>
@@ -245,10 +236,9 @@ const LeaderboardPage = () => {
                       </div>
                       <Address address={leaderboardData[1].player} />
                       <div className="mt-2 text-lg font-bold text-gray-900 dark:text-white">
-                        {activeTab === 'wins' 
+                        {activeTab === "wins"
                           ? `${leaderboardData[1].totalWins.toString()} wins`
-                          : `${formatEther(leaderboardData[1].totalPrizesWon)} FLOW`
-                        }
+                          : `${formatEther(leaderboardData[1].totalPrizesWon)} FLOW`}
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">
                         {(leaderboardData[1].winRate * 100).toFixed(1)}% win rate
@@ -264,10 +254,9 @@ const LeaderboardPage = () => {
                       </div>
                       <Address address={leaderboardData[0].player} />
                       <div className="mt-3 text-xl font-bold text-black">
-                        {activeTab === 'wins' 
+                        {activeTab === "wins"
                           ? `${leaderboardData[0].totalWins.toString()} wins`
-                          : `${formatEther(leaderboardData[0].totalPrizesWon)} FLOW`
-                        }
+                          : `${formatEther(leaderboardData[0].totalPrizesWon)} FLOW`}
                       </div>
                       <div className="text-sm text-gray-800">
                         {(leaderboardData[0].winRate * 100).toFixed(1)}% win rate
@@ -283,10 +272,9 @@ const LeaderboardPage = () => {
                       </div>
                       <Address address={leaderboardData[2].player} />
                       <div className="mt-2 text-lg font-bold text-white">
-                        {activeTab === 'wins' 
+                        {activeTab === "wins"
                           ? `${leaderboardData[2].totalWins.toString()} wins`
-                          : `${formatEther(leaderboardData[2].totalPrizesWon)} FLOW`
-                        }
+                          : `${formatEther(leaderboardData[2].totalPrizesWon)} FLOW`}
                       </div>
                       <div className="text-sm text-gray-200">
                         {(leaderboardData[2].winRate * 100).toFixed(1)}% win rate
@@ -312,24 +300,24 @@ const LeaderboardPage = () => {
                     )}
                   </div>
                 </div>
-                
+
                 <div className="divide-y divide-gray-200/50 dark:divide-gray-700/50">
                   {leaderboardData.map((entry, index) => (
-                    <div 
-                      key={entry.player} 
+                    <div
+                      key={entry.player}
                       className={`p-6 flex items-center justify-between hover:bg-white/50 dark:hover:bg-gray-700/50 transition-all duration-300 ${
-                        connectedAccount?.toLowerCase() === entry.player.toLowerCase() 
-                          ? 'bg-purple-50/80 dark:bg-purple-900/20 border-l-4 border-purple-500' 
-                          : ''
+                        connectedAccount?.toLowerCase() === entry.player.toLowerCase()
+                          ? "bg-purple-50/80 dark:bg-purple-900/20 border-l-4 border-purple-500"
+                          : ""
                       }`}
                     >
                       <div className="flex items-center space-x-4">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${getRankBadgeColor(index + 1)} shadow-lg`}>
-                          {index < 3 ? getRankIcon(index + 1) : (
-                            <span className="text-lg font-bold">#{index + 1}</span>
-                          )}
+                        <div
+                          className={`w-12 h-12 rounded-full flex items-center justify-center ${getRankBadgeColor(index + 1)} shadow-lg`}
+                        >
+                          {index < 3 ? getRankIcon(index + 1) : <span className="text-lg font-bold">#{index + 1}</span>}
                         </div>
-                        
+
                         <div>
                           <Address address={entry.player} />
                           {connectedAccount?.toLowerCase() === entry.player.toLowerCase() && (
@@ -337,13 +325,12 @@ const LeaderboardPage = () => {
                           )}
                         </div>
                       </div>
-                      
+
                       <div className="text-right">
                         <div className="text-xl font-bold text-gray-900 dark:text-white">
-                          {activeTab === 'wins' 
+                          {activeTab === "wins"
                             ? `${entry.totalWins.toString()} wins`
-                            : `${formatEther(entry.totalPrizesWon)} FLOW`
-                          }
+                            : `${formatEther(entry.totalPrizesWon)} FLOW`}
                         </div>
                         <div className="text-sm text-gray-500 dark:text-gray-400">
                           {entry.totalGuesses.toString()} total guesses • {(entry.winRate * 100).toFixed(1)}% win rate
@@ -364,15 +351,13 @@ const LeaderboardPage = () => {
               <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/20 dark:to-blue-900/20 rounded-full mb-8">
                 <TrophyIcon className="w-12 h-12 text-purple-500" />
               </div>
-              
-              <h3 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">
-                No Champions Yet
-              </h3>
-              
+
+              <h3 className="text-4xl font-bold text-gray-900 dark:text-white mb-6">No Champions Yet</h3>
+
               <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-lg mx-auto leading-relaxed">
                 Be the first to solve a challenge and claim your spot on the leaderboard!
               </p>
-              
+
               <button
                 onClick={handleRefresh}
                 className="bg-purple-500 hover:bg-purple-600 text-white px-8 py-3 rounded-xl font-semibold transition-colors shadow-lg"
@@ -387,4 +372,4 @@ const LeaderboardPage = () => {
   );
 };
 
-export default LeaderboardPage; 
+export default LeaderboardPage;

@@ -63,22 +63,22 @@ export class BlockscoutService {
   static async fetchAllContractLogs(useCache = true): Promise<ContractLog[]> {
     // Check cache first
     if (useCache && cache && Date.now() - cache.timestamp < CACHE_DURATION) {
-      console.log('Using cached data');
+      console.log("Using cached data");
       return cache.data;
     }
 
-    console.log('Fetching fresh data from Blockscout...');
+    console.log("Fetching fresh data from Blockscout...");
     const allLogs: ContractLog[] = [];
     let nextPageParams: any = null;
     let pageCount = 0;
-    
+
     do {
       const url = new URL(`${BLOCKSCOUT_BASE_URL}/addresses/${CONTRACT_ADDRESS}/logs`);
-      
+
       if (nextPageParams) {
-        url.searchParams.append('block_number', nextPageParams.block_number.toString());
-        url.searchParams.append('index', nextPageParams.index.toString());
-        url.searchParams.append('items_count', nextPageParams.items_count.toString());
+        url.searchParams.append("block_number", nextPageParams.block_number.toString());
+        url.searchParams.append("index", nextPageParams.index.toString());
+        url.searchParams.append("items_count", nextPageParams.items_count.toString());
       }
 
       try {
@@ -88,16 +88,16 @@ export class BlockscoutService {
         }
 
         const data: BlockscoutResponse = await response.json();
-        
+
         // Filter for only decoded logs
         const decodedLogs = data.items.filter(log => log.decoded && log.decoded.method_call);
         allLogs.push(...decodedLogs);
-        
+
         nextPageParams = data.next_page_params;
         pageCount++;
-        
+
         console.log(`Fetched page ${pageCount}, got ${decodedLogs.length} decoded logs`);
-        
+
         // Add a small delay to avoid rate limiting
         if (nextPageParams) {
           await new Promise(resolve => setTimeout(resolve, 200));
@@ -109,11 +109,11 @@ export class BlockscoutService {
     } while (nextPageParams);
 
     console.log(`Total logs fetched: ${allLogs.length}`);
-    
+
     // Update cache
     cache = {
       data: allLogs,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
 
     return allLogs;
@@ -148,7 +148,7 @@ export class BlockscoutService {
           {
             const winner = parameters.find(p => p.name === "winner")?.value;
             const amount = parameters.find(p => p.name === "amount")?.value;
-            
+
             if (winner && amount) {
               const stats = getOrCreatePlayerStats(winner);
               stats.totalPrizesWon += BigInt(amount);
@@ -161,7 +161,7 @@ export class BlockscoutService {
           {
             const guesser = parameters.find(p => p.name === "guesser")?.value;
             const isCorrect = parameters.find(p => p.name === "isCorrect")?.value === "true";
-            
+
             if (guesser) {
               const stats = getOrCreatePlayerStats(guesser);
               stats.totalGuesses += BigInt(1);
@@ -177,7 +177,7 @@ export class BlockscoutService {
         case "ChallengeCreated(uint256 indexed challengeId, address indexed creator, string imageUrl, uint256 initialPrizePool)":
           {
             const creator = parameters.find(p => p.name === "creator")?.value;
-            
+
             if (creator) {
               const stats = getOrCreatePlayerStats(creator);
               stats.challengesCreated += BigInt(1);
@@ -206,8 +206,8 @@ export class BlockscoutService {
    * Generate leaderboard entries from player statistics
    */
   static generateLeaderboard(
-    playerStats: Map<string, PlayerStats>, 
-    sortBy: 'wins' | 'prizes' | 'winRate' | 'activity' = 'wins'
+    playerStats: Map<string, PlayerStats>,
+    sortBy: "wins" | "prizes" | "winRate" | "activity" = "wins",
   ): LeaderboardEntry[] {
     const entries: LeaderboardEntry[] = Array.from(playerStats.entries()).map(([player, stats]) => ({
       player: player as `0x${string}`,
@@ -222,7 +222,7 @@ export class BlockscoutService {
     // Sort based on criteria
     return entries.sort((a, b) => {
       switch (sortBy) {
-        case 'wins':
+        case "wins":
           // Primary: total wins, Secondary: win rate, Tertiary: total guesses
           if (a.totalWins !== b.totalWins) {
             return Number(b.totalWins - a.totalWins);
@@ -232,7 +232,7 @@ export class BlockscoutService {
           }
           return Number(b.totalGuesses - a.totalGuesses);
 
-        case 'prizes':
+        case "prizes":
           // Primary: total prizes, Secondary: total wins, Tertiary: win rate
           if (a.totalPrizesWon !== b.totalPrizesWon) {
             return Number(b.totalPrizesWon - a.totalPrizesWon);
@@ -242,14 +242,14 @@ export class BlockscoutService {
           }
           return b.winRate - a.winRate;
 
-        case 'winRate':
+        case "winRate":
           // Primary: win rate (min 5 guesses), Secondary: total wins, Tertiary: total guesses
           const aQualified = a.totalGuesses >= 5;
           const bQualified = b.totalGuesses >= 5;
-          
+
           if (aQualified && !bQualified) return -1;
           if (!aQualified && bQualified) return 1;
-          
+
           if (Math.abs(a.winRate - b.winRate) > 0.001) {
             return b.winRate - a.winRate;
           }
@@ -258,7 +258,7 @@ export class BlockscoutService {
           }
           return Number(b.totalGuesses - a.totalGuesses);
 
-        case 'activity':
+        case "activity":
           // Primary: last activity, Secondary: total guesses, Tertiary: total wins
           if (a.lastActivity !== b.lastActivity) {
             return b.lastActivity - a.lastActivity;
@@ -277,13 +277,13 @@ export class BlockscoutService {
   /**
    * Get leaderboard data with caching
    */
-  static async getLeaderboard(sortBy: 'wins' | 'prizes' = 'wins', useCache = true): Promise<LeaderboardEntry[]> {
+  static async getLeaderboard(sortBy: "wins" | "prizes" = "wins", useCache = true): Promise<LeaderboardEntry[]> {
     try {
       const logs = await this.fetchAllContractLogs(useCache);
       const playerStats = this.processContractLogs(logs);
       return this.generateLeaderboard(playerStats, sortBy);
     } catch (error) {
-      console.error('Error generating leaderboard:', error);
+      console.error("Error generating leaderboard:", error);
       throw error;
     }
   }
@@ -297,7 +297,7 @@ export class BlockscoutService {
       const playerStats = this.processContractLogs(logs);
       return playerStats.get(playerAddress.toLowerCase()) || null;
     } catch (error) {
-      console.error('Error getting player stats:', error);
+      console.error("Error getting player stats:", error);
       throw error;
     }
   }
@@ -316,10 +316,10 @@ export class BlockscoutService {
     if (!cache) {
       return { cached: false };
     }
-    
+
     const age = Date.now() - cache.timestamp;
     return { cached: true, age };
   }
 }
 
-export type { LeaderboardEntry, PlayerStats, ContractLog }; 
+export type { LeaderboardEntry, PlayerStats, ContractLog };

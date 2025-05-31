@@ -1,13 +1,13 @@
 import React from "react";
 import Link from "next/link";
 import { hardhat } from "viem/chains";
-import { 
-  CurrencyDollarIcon, 
-  MagnifyingGlassIcon,
-  HeartIcon,
-  SparklesIcon,
+import {
+  ChatBubbleLeftRightIcon,
   CodeBracketIcon,
-  ChatBubbleLeftRightIcon
+  CurrencyDollarIcon,
+  HeartIcon,
+  MagnifyingGlassIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { SwitchTheme } from "~~/components/SwitchTheme";
 import { Faucet } from "~~/components/scaffold-eth";
@@ -33,17 +33,15 @@ export const Footer = () => {
               <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg border border-white/20 rounded-2xl px-4 py-2 shadow-lg">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <CurrencyDollarIcon className="h-4 w-4 text-green-500" />
-                  <span className="text-gray-900 dark:text-white">
-                    ${nativeCurrencyPrice.toFixed(2)}
-                  </span>
+                  <span className="text-gray-900 dark:text-white">${nativeCurrencyPrice.toFixed(2)}</span>
                 </div>
               </div>
             )}
             {isLocalNetwork && (
               <div className="flex flex-col sm:flex-row gap-2">
                 <Faucet />
-                <Link 
-                  href="/blockexplorer" 
+                <Link
+                  href="/blockexplorer"
                   className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg border border-white/20 rounded-2xl px-4 py-2 shadow-lg hover:shadow-xl transition-all duration-300 group"
                 >
                   <div className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-white">
@@ -75,9 +73,7 @@ export const Footer = () => {
                 <div className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
                   Prompt Genius
                 </div>
-                <div className="text-sm text-gray-500 dark:text-gray-400">
-                  AI Guessing Game
-                </div>
+                <div className="text-sm text-gray-500 dark:text-gray-400">AI Guessing Game</div>
               </div>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400 text-center md:text-left max-w-sm">
@@ -87,25 +83,23 @@ export const Footer = () => {
 
           {/* Quick Links */}
           <div className="flex flex-col items-center space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Quick Links
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Quick Links</h3>
             <div className="flex flex-col space-y-2 text-center">
-              <Link 
-                href="/" 
+              <Link
+                href="/"
                 className="text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors text-sm"
               >
                 Browse Challenges
               </Link>
-              <Link 
-                href="/create" 
+              <Link
+                href="/create"
                 className="text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors text-sm"
               >
                 Create Challenge
               </Link>
               {isLocalNetwork && (
-                <Link 
-                  href="/debug" 
+                <Link
+                  href="/debug"
                   className="text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors text-sm"
                 >
                   Debug Contracts
@@ -116,9 +110,7 @@ export const Footer = () => {
 
           {/* Built With */}
           <div className="flex flex-col items-center space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Built With
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Built With</h3>
             <div className="flex flex-col space-y-3 text-center">
               <a
                 href="https://github.com/scaffold-eth/se-2"
