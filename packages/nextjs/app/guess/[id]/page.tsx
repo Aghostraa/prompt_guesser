@@ -80,7 +80,9 @@ const GuessPage = ({ params: paramsPromise }: { params: Promise<PageParams> }) =
   }, [fetchedChallengeData]);
 
   useEffect(() => {
-    if (guessEvents && challengeData) {
+    if (guessEvents && fetchedChallengeData) {
+      const contractData = fetchedChallengeData as any;
+
       const formattedGuesses = guessEvents.map(event => {
         const blockTimestamp = (event as any).blockTimestamp;
         return {
@@ -90,46 +92,34 @@ const GuessPage = ({ params: paramsPromise }: { params: Promise<PageParams> }) =
           isCorrect: event.args.isCorrect,
         };
       });
-      let currentPrizePoolWei;
-      // Initialize prize pool based on the fetched challenge data if available, otherwise start from 0 or a sensible default
-      if (challengeData && challengeData.prizePool) {
-        try {
-          currentPrizePoolWei = parseEther(challengeData.prizePool);
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (_e) {
-          console.warn("Could not parse initial prize pool from challengeData, defaulting to 0 or fetched data.");
-          // Fallback to directly using fetchedChallengeData's prizePool if parsing fails or challengeData.prizePool is not yet set correctly
-          currentPrizePoolWei = fetchedChallengeData ? (fetchedChallengeData as any).prizePool : BigInt(0);
-        }
-      } else if (fetchedChallengeData) {
-        currentPrizePoolWei = (fetchedChallengeData as any).prizePool;
-      } else {
-        currentPrizePoolWei = BigInt(0); // Absolute fallback
-      }
 
-      let isActive = challengeData
-        ? challengeData.isActive
-        : fetchedChallengeData
-          ? (fetchedChallengeData as any).isActive
-          : true;
+      // Initialize prize pool and active status directly from fetchedChallengeData
+      let calculatedPrizePoolWei = contractData.prizePool !== undefined ? BigInt(contractData.prizePool) : BigInt(0);
+      let calculatedIsActive = contractData.isActive !== undefined ? contractData.isActive : true;
 
+      // Apply effect of guessEvents
       for (const event of guessEvents) {
         if (event.args.isCorrect) {
-          currentPrizePoolWei = BigInt(0);
-          isActive = false;
+          calculatedPrizePoolWei = BigInt(0); // Prize pool becomes 0 if there's a correct guess
+          calculatedIsActive = false;
           break;
         } else {
-          currentPrizePoolWei += parseEther(FIXED_GUESS_FEE_ETH);
+          calculatedPrizePoolWei += parseEther(FIXED_GUESS_FEE_ETH);
         }
       }
-      setChallengeData(prevData => ({
-        ...(prevData as ChallengeData),
+
+      setChallengeData({
+        // Base data from fetchedChallengeData
+        id: contractData.id.toString(),
+        imageUrl: contractData.imageUrl,
+        creator: contractData.creator,
+        // Calculated data
         guesses: formattedGuesses.sort((a, b) => b.timestamp - a.timestamp),
-        prizePool: formatEther(currentPrizePoolWei),
-        isActive: isActive,
-      }));
+        prizePool: formatEther(calculatedPrizePoolWei),
+        isActive: calculatedIsActive,
+      });
     }
-  }, [guessEvents, challengeData, fetchedChallengeData]);
+  }, [guessEvents, fetchedChallengeData]);
 
   useEffect(() => {
     if (notification) {
