@@ -21,21 +21,23 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
   */
   const { deployer } = await hre.getNamedAccounts();
   const { deploy } = hre.deployments;
+  const platformWalletAddress = "0xd2C02DBAA4bAf7984eC5CA471C6d0ac7baa58cDd";
 
   // Only deploy on Flow networks or localhost
   const isFlowNetwork = ["flowTestnet", "flowMainnet", "localhost", "hardhat"].includes(hre.network.name);
   
   if (!isFlowNetwork) {
-    console.log(`Skipping deployment on ${hre.network.name} - not a Flow network`);
+    console.log(`⏭️  Skipping Flow deployment on ${hre.network.name} - this script is for Flow networks only`);
     return;
   }
 
-  console.log(`Deploying YourContract to ${hre.network.name}...`);
+  console.log(`🌊 Deploying YourContract to ${hre.network.name}...`);
+  console.log(`📍 Deployer address: ${deployer}`);
 
   await deploy("YourContract", {
     from: deployer,
     // Contract constructor arguments
-    args: [deployer],
+    args: [deployer, platformWalletAddress],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.
@@ -44,7 +46,7 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
 
   // Get the deployed contract to interact with it after deploying.
   const yourContract = await hre.ethers.getContract<Contract>("YourContract", deployer);
-  console.log("👋 Initial greeting:", await yourContract.greeting());
+  console.log("🎮 Contract owner:", await yourContract.owner());
 
   if (hre.network.name.includes("flow")) {
     console.log(`✅ YourContract deployed to Flow ${hre.network.name}!`);

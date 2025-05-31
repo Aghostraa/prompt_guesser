@@ -14,9 +14,12 @@ import {
   TrophyIcon,
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
-import { BanknotesIcon as BanknotesIconSolid, SparklesIcon as SparklesIconSolid } from "@heroicons/react/24/solid";
+import { BanknotesIcon as BanknotesIconSolid, SparklesIcon as SparklesIconSolid, ExclamationTriangleIcon } from "@heroicons/react/24/solid";
 import { Address } from "~~/components/scaffold-eth";
 import { useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
+import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
+import { hardhat } from "viem/chains";
+import { LeaderboardWidget } from "~~/components/LeaderboardWidget";
 
 interface ImagePost {
   id: bigint;
@@ -45,36 +48,59 @@ const Home: NextPage = () => {
     watch: true,
   });
 
+  const { targetNetwork } = useTargetNetwork();
+
   useEffect(() => {
     setIsLoadingChallenges(isLoadingEvents);
+    
+    // Handle case where contract might not exist on the network
     if (challengeEvents) {
-      const formattedChallenges = challengeEvents
-        .map(event => {
-          if (
-            event.args.challengeId === undefined ||
-            event.args.imageUrl === undefined ||
-            event.args.creator === undefined ||
-            !event.args.creator.startsWith("0x")
-          ) {
-            return null;
-          }
-          
-          // Check if this challenge has been solved
-          const correctGuess = guessEvents?.find(
-            guess => guess.args.challengeId === event.args.challengeId && guess.args.isCorrect === true
-          );
-          
-          return {
-            id: event.args.challengeId,
-            imageUrl: event.args.imageUrl,
-            prizePool: event.args.initialPrizePool ? formatEther(event.args.initialPrizePool) : "0",
-            creator: event.args.creator as `0x${string}`,
-            isActive: !correctGuess, // Challenge is active if no correct guess exists
-          };
-        })
-        .filter((challenge): challenge is ImagePost & { isActive: boolean } => challenge !== null)
-        .sort((a, b) => Number(b.id) - Number(a.id));
-      setAllImages(formattedChallenges);
+      try {
+        const formattedChallenges = challengeEvents
+          .map(event => {
+            // Add comprehensive safety checks for event structure
+            if (
+              !event?.args ||
+              typeof event.args !== 'object' ||
+              event.args.challengeId === undefined ||
+              event.args.imageUrl === undefined ||
+              event.args.creator === undefined ||
+              typeof event.args.creator !== 'string' ||
+              !event.args.creator.startsWith("0x")
+            ) {
+              console.warn('Invalid event structure:', event);
+              return null;
+            }
+            
+            // Check if this challenge has been solved with safety checks
+            const correctGuess = guessEvents?.find(
+              guess => 
+                guess?.args && 
+                typeof guess.args === 'object' &&
+                guess.args.challengeId === event.args.challengeId && 
+                guess.args.isCorrect === true
+            );
+            
+            return {
+              id: event.args.challengeId,
+              imageUrl: event.args.imageUrl,
+              prizePool: event.args.initialPrizePool ? formatEther(event.args.initialPrizePool) : "0",
+              creator: event.args.creator as `0x${string}`,
+              isActive: !correctGuess, // Challenge is active if no correct guess exists
+            };
+          })
+          .filter((challenge): challenge is ImagePost & { isActive: boolean } => challenge !== null)
+          .sort((a, b) => Number(b.id) - Number(a.id));
+        
+        setAllImages(formattedChallenges);
+      } catch (error) {
+        console.error('Error processing challenge events:', error);
+        // Set empty array to prevent UI crashes
+        setAllImages([]);
+      }
+    } else {
+      // If no events, set empty array
+      setAllImages([]);
     }
   }, [challengeEvents, isLoadingEvents, guessEvents]);
 
@@ -109,11 +135,11 @@ const Home: NextPage = () => {
                 </h1>
                 
                 <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed font-medium">
-                  The ultimate AI prompt guessing game on the blockchain. Create stunning AI images, challenge the community, and win ETH rewards!
+                  The ultimate AI prompt guessing game on the blockchain. Create stunning AI images, challenge the community, and win FLOW rewards!
                 </p>
                 
                 <p className="text-lg text-gray-500 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
-                  Test your creativity and intuition by guessing the prompts behind AI-generated masterpieces. Every guess costs 0.1 ETH and grows the prize pool until someone cracks the code.
+                  Test your creativity and intuition by guessing the prompts behind AI-generated masterpieces. Guessing fee is 10% of the prize pool (in FLOW), with fees distributed to the creator and platform.
                 </p>
               </div>
             </div>
@@ -149,7 +175,7 @@ const Home: NextPage = () => {
                     <div className="text-2xl font-bold text-gray-900 dark:text-white">
                       {activeChallenges.reduce((total, image) => total + parseFloat(image.prizePool), 0).toFixed(2)}
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">ETH in Active Pools</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">FLOW in Active Pools</div>
                   </div>
                 </div>
               </div>
@@ -172,7 +198,7 @@ const Home: NextPage = () => {
                     or scroll down to start guessing
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-500">
-                    0.1 ETH per guess • Winner takes all
+                    Dynamic FLOW fee per guess • Winner takes prize
                   </p>
                 </div>
               </div>
@@ -181,17 +207,32 @@ const Home: NextPage = () => {
         </div>
       </section>
 
-      {/* Divider */}
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-200/50 dark:border-gray-700/50"></div>
-        </div>
-        <div className="relative flex justify-center">
-          <div className="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-purple-950 dark:to-indigo-950 px-6">
-            <SparklesIcon className="w-6 h-6 text-gray-400" />
+      {/* Leaderboard Preview Section */}
+      <section className="relative py-16 lg:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-4">
+              Hall of Fame
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              See who&apos;s dominating the prompt guessing arena. Will you be next?
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <LeaderboardWidget 
+              title="Top Winners" 
+              maxItems={5} 
+              showByPrizes={false} 
+            />
+            <LeaderboardWidget 
+              title="Top Earners" 
+              maxItems={5} 
+              showByPrizes={true} 
+            />
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Main Content Section */}
       <section className="relative py-20 lg:py-24">
@@ -274,6 +315,27 @@ const Home: NextPage = () => {
             {/* Empty State */}
             {!isLoadingChallenges && displayedChallenges.length === 0 && (
               <div className="text-center py-24">
+                {/* Network Status Alert for non-hardhat networks with no challenges */}
+                {!isLoadingEvents && challengeEvents?.length === 0 && targetNetwork.id !== hardhat.id && (
+                  <div className="mb-8 mx-auto max-w-md">
+                    <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700/50 rounded-2xl p-6">
+                      <div className="flex items-center justify-center mb-4">
+                        <ExclamationTriangleIcon className="w-8 h-8 text-yellow-500" />
+                      </div>
+                      <h4 className="text-lg font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+                        Network Notice
+                      </h4>
+                      <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-4">
+                        No challenges found on <strong>{targetNetwork.name}</strong>. 
+                        The contract might not be deployed on this network yet.
+                      </p>
+                      <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                        Try switching to a supported network or check if the contract is deployed.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/20 dark:to-blue-900/20 rounded-full mb-8">
                   {activeTab === 'active' ? (
                     <PhotoIcon className="w-12 h-12 text-purple-500" />
@@ -324,8 +386,11 @@ const Home: NextPage = () => {
                       key={image.id}
                       className="group relative"
                       style={{
+                        animationName: "fadeInUp",
+                        animationDuration: "0.6s",
+                        animationTimingFunction: "ease-out",
+                        animationFillMode: "forwards",
                         animationDelay: `${index * 100}ms`,
-                        animation: "fadeInUp 0.6s ease-out forwards",
                       }}
                     >
                       <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl overflow-hidden border border-white/20 hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2">
@@ -349,7 +414,7 @@ const Home: NextPage = () => {
                               {(image as any).isActive ? (
                                 <>
                                   <SparklesIconSolid className="w-4 h-4" />
-                                  <span>{image.prizePool} ETH</span>
+                                  <span>{image.prizePool} FLOW</span>
                                 </>
                               ) : (
                                 <>
@@ -374,7 +439,7 @@ const Home: NextPage = () => {
                               <div className="flex items-center space-x-2">
                                 <div className="flex items-center space-x-1 text-green-600 dark:text-green-400">
                                   <BanknotesIcon className="w-5 h-5" />
-                                  <span className="text-xl font-bold">{image.prizePool} ETH</span>
+                                  <span className="text-xl font-bold">{image.prizePool} FLOW</span>
                                 </div>
                               </div>
                             ) : (

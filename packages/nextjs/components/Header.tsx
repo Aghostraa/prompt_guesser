@@ -9,7 +9,8 @@ import {
   BugAntIcon, 
   HomeIcon,
   SparklesIcon,
-  PlusIcon
+  PlusIcon,
+  TrophyIcon
 } from "@heroicons/react/24/outline";
 import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { useOutsideClick, useTargetNetwork } from "~~/hooks/scaffold-eth";
@@ -30,6 +31,11 @@ export const menuLinks: HeaderMenuLink[] = [
     label: "Create",
     href: "/create",
     icon: <PlusIcon className="h-4 w-4" />,
+  },
+  {
+    label: "Leaderboard",
+    href: "/leaderboard",
+    icon: <TrophyIcon className="h-4 w-4" />,
   },
   {
     label: "Debug",
