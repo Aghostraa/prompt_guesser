@@ -13,13 +13,13 @@ import {
   SparklesIcon,
   TrophyIcon,
   UserGroupIcon,
-  EyeIcon,
 } from "@heroicons/react/24/outline";
 import { BanknotesIcon as BanknotesIconSolid, SparklesIcon as SparklesIconSolid, ExclamationTriangleIcon } from "@heroicons/react/24/solid";
 import { Address } from "~~/components/scaffold-eth";
 import { useScaffoldEventHistory } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 import { hardhat } from "viem/chains";
+import { LeaderboardWidget } from "~~/components/LeaderboardWidget";
 
 interface ImagePost {
   id: bigint;
@@ -203,6 +203,45 @@ const Home: NextPage = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Divider */}
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-gray-200/50 dark:border-gray-700/50"></div>
+        </div>
+        <div className="relative flex justify-center">
+          <div className="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-purple-950 dark:to-indigo-950 px-6">
+            <SparklesIcon className="w-6 h-6 text-gray-400" />
+          </div>
+        </div>
+      </div>
+
+      {/* Leaderboard Preview Section */}
+      <section className="relative py-16 lg:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-4">
+              Hall of Fame
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              See who&apos;s dominating the prompt guessing arena. Will you be next?
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <LeaderboardWidget 
+              title="Top Winners" 
+              maxItems={5} 
+              showByPrizes={false} 
+            />
+            <LeaderboardWidget 
+              title="Top Earners" 
+              maxItems={5} 
+              showByPrizes={true} 
+            />
           </div>
         </div>
       </section>
