@@ -151,6 +151,17 @@ const config: HardhatUserConfig = {
       url: "https://alfajores-forno.celo-testnet.org",
       accounts: [deployerPrivateKey],
     },
+    // Flow EVM Networks
+    flowTestnet: {
+      url: "https://testnet.evm.nodes.onflow.org",
+      accounts: [deployerPrivateKey],
+      chainId: 545,
+    },
+    flowMainnet: {
+      url: "https://mainnet.evm.nodes.onflow.org", 
+      accounts: [deployerPrivateKey],
+      chainId: 747,
+    },
   },
   // Configuration for harhdat-verify plugin
   etherscan: {
