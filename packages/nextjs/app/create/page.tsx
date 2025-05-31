@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { keccak256, parseEther, stringToBytes } from "viem";
-import { useAccount } from "wagmi";
+import { keccak256, parseEther, stringToBytes, formatEther } from "viem";
+import { useAccount, useBalance } from "wagmi";
 import { 
   ArrowLeftIcon,
   SparklesIcon,
@@ -23,10 +23,13 @@ import {
 } from "@heroicons/react/24/solid";
 import { EtherInput } from "~~/components/scaffold-eth";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
 
 const CreatePage = () => {
   const router = useRouter();
   const { address: connectedAddress } = useAccount();
+  const { data: balance } = useBalance({ address: connectedAddress });
+  const { targetNetwork } = useTargetNetwork();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [prompt, setPrompt] = useState("");
@@ -52,11 +55,44 @@ const CreatePage = () => {
     setTxValue(prizePool);
   }, [prizePool]);
 
+  // Check if the entered prize pool exceeds user's balance
+  const prizePoolExceedsBalance = () => {
+    if (!balance || !prizePool) return false;
+    try {
+      const prizePoolWei = parseEther(prizePool);
+      return prizePoolWei > balance.value;
+    } catch {
+      return false; // Invalid input
+    }
+  };
+
+  const isInsufficientBalance = prizePoolExceedsBalance();
+
   const handleGenerateImage = async () => {
-    if (!prompt || !prizePool) {
-      setNotification("Error: Prompt and Initial Prize Pool amount are required.");
+    if (!prompt.trim()) {
+      setNotification("Error: Please enter a prompt before generating an image.");
       return;
     }
+
+    if (!prizePool.trim()) {
+      setNotification("Error: Please enter a prize pool amount.");
+      return;
+    }
+
+    // Check balance before proceeding
+    if (balance && prizePool) {
+      try {
+        const prizePoolWei = parseEther(prizePool);
+        if (prizePoolWei > balance.value) {
+          setNotification("Error: Prize pool amount exceeds your account balance.");
+          return;
+        }
+      } catch {
+        setNotification("Error: Invalid prize pool amount entered.");
+        return;
+      }
+    }
+
     setIsGenerating(true);
     setCurrentStep(2);
     
@@ -72,18 +108,29 @@ const CreatePage = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate image');
+        // Handle specific OpenAI content policy violations gracefully
+        if (response.status === 400 && data.error?.includes('content policy')) {
+          setNotification("Error: Your prompt may contain inappropriate content. Please try rephrasing with family-friendly language.");
+        } else if (data.error?.includes('usage policies')) {
+          setNotification("Error: Please rephrase your prompt to comply with content guidelines.");
+        } else {
+          setNotification(`Error: ${data.error || 'Failed to generate image. Please try again.'}`);
+        }
+        setCurrentStep(1); // Go back to step 1 on error
+        return; // Don't throw error, just return
       }
 
       if (data.success && data.imageUrl) {
         setGeneratedImageLocalPath(data.imageUrl);
         setCurrentStep(3);
       } else {
-        throw new Error('Invalid response from image generation API');
+        setNotification("Error: Unexpected response from image generation. Please try again.");
+        setCurrentStep(1); // Go back to step 1 on error
       }
     } catch (error) {
-      console.error('Error generating image:', error);
-      setNotification(`Error: ${error instanceof Error ? error.message : 'Failed to generate image'}`);
+      // Only console.warn for network errors, not user input errors
+      console.warn('Network error during image generation:', error);
+      setNotification("Error: Network error occurred. Please check your connection and try again.");
       setCurrentStep(1); // Go back to step 1 on error
     } finally {
       setIsGenerating(false);
@@ -99,6 +146,11 @@ const CreatePage = () => {
       return;
     }
 
+    // Additional check for Flow networks
+    if (targetNetwork.id === 545 || targetNetwork.id === 747) {
+      setNotification("🌊 Submitting to Flow network... This may take a moment.");
+    }
+
     try {
       setIsSubmittingChallenge(true);
       setCurrentStep(4);
@@ -108,6 +160,7 @@ const CreatePage = () => {
       console.log("Image URL:", generatedImageLocalPath);
       console.log("Initial Prize Pool (argument to contract _initialPrizePool):", "0");
       console.log("Transaction Value (msg.value):", txValue);
+      console.log("Target Network:", targetNetwork.name, "Chain ID:", targetNetwork.id);
 
       await writeContractAsync({
         functionName: "createChallenge",
@@ -120,7 +173,13 @@ const CreatePage = () => {
       setTimeout(() => router.push("/"), 3000);
     } catch (error) {
       console.error("Error creating challenge:", error);
-      setNotification("Error: Failed to create challenge. Check console.");
+      
+      // Provide Flow-specific error guidance
+      if (targetNetwork.id === 545 || targetNetwork.id === 747) {
+        setNotification("Error: Failed to create challenge on Flow network. Make sure Flow network is added to your wallet and you have FLOW tokens for gas fees.");
+      } else {
+        setNotification("Error: Failed to create challenge. Check console for details.");
+      }
       setCurrentStep(3); // Go back to previous step
     } finally {
       setIsSubmittingChallenge(false);
@@ -241,6 +300,39 @@ const CreatePage = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
+        {/* Flow Network Info Banner */}
+        {(targetNetwork.id === 545 || targetNetwork.id === 747) && (
+          <div className="mb-8">
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/50 rounded-2xl p-6">
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0">
+                  <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-bold">🌊</span>
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-200 mb-2">
+                    Using Flow Network
+                  </h3>
+                  <div className="text-sm text-blue-800 dark:text-blue-300 space-y-2">
+                    <p>
+                      You're creating a challenge on <strong>{targetNetwork.name}</strong>. Make sure you have:
+                    </p>
+                    <ul className="list-disc list-inside space-y-1 ml-4">
+                      <li>FLOW tokens for transaction fees</li>
+                      <li>Flow network added to your wallet</li>
+                      <li>Sufficient balance for the prize pool amount</li>
+                    </ul>
+                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-3">
+                      If you need to add Flow network to MetaMask, switch networks and use the "Add Flow to MetaMask" option.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Left Panel - Form */}
           <div className="space-y-8">
@@ -291,9 +383,40 @@ const CreatePage = () => {
                           placeholder="0.1"
                         />
                       </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        This ETH will be locked in the smart contract as the reward
-                      </p>
+                      
+                      {/* Balance display and validation */}
+                      <div className="mt-2 space-y-1">
+                        {balance && connectedAddress && (
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-gray-500 dark:text-gray-400">
+                              Your balance: <span className="font-medium text-gray-700 dark:text-gray-300">
+                                {parseFloat(formatEther(balance.value)).toFixed(4)} ETH
+                              </span>
+                            </span>
+                            {prizePool && !isInsufficientBalance && (
+                              <span className="text-green-600 dark:text-green-400 text-xs">✓ Valid amount</span>
+                            )}
+                          </div>
+                        )}
+
+                        {!connectedAddress && (
+                          <div className="flex items-center space-x-1 text-amber-600 dark:text-amber-400 text-xs">
+                            <ExclamationTriangleIcon className="w-4 h-4" />
+                            <span>Connect your wallet to see your balance</span>
+                          </div>
+                        )}
+                        
+                        {isInsufficientBalance && (
+                          <div className="flex items-center space-x-1 text-red-600 dark:text-red-400 text-xs">
+                            <ExclamationTriangleIcon className="w-4 h-4" />
+                            <span>Insufficient balance for this prize pool</span>
+                          </div>
+                        )}
+                        
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          This ETH will be locked in the smart contract as the reward
+                        </p>
+                      </div>
                     </div>
                   </div>
 
@@ -301,11 +424,16 @@ const CreatePage = () => {
                     type="button"
                     className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-purple-500/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                     onClick={handleGenerateImage}
-                    disabled={!prompt || !prizePool || isGenerating}
+                    disabled={!prompt || !prizePool || isGenerating || isInsufficientBalance}
                   >
                     <div className="flex items-center justify-center space-x-2">
                       <SparklesIcon className="w-5 h-5" />
-                      <span>Generate AI Image</span>
+                      <span>
+                        {isInsufficientBalance 
+                          ? "Insufficient Balance" 
+                          : "Generate AI Image"
+                        }
+                      </span>
                     </div>
                   </button>
                 </div>

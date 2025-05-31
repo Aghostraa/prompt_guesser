@@ -532,8 +532,11 @@ const GuessPage = ({ params: paramsPromise }: { params: Promise<PageParams> }) =
                             : "border-gray-200 dark:border-gray-600"
                         }`}
                         style={{
+                          animationName: "fadeInUp",
+                          animationDuration: "0.6s",
+                          animationTimingFunction: "ease-out",
+                          animationFillMode: "forwards",
                           animationDelay: `${index * 100}ms`,
-                          animation: "fadeInUp 0.6s ease-out forwards",
                         }}
                       >
                         <div className="flex items-start justify-between">

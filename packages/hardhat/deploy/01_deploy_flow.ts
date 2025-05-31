@@ -26,11 +26,12 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
   const isFlowNetwork = ["flowTestnet", "flowMainnet", "localhost", "hardhat"].includes(hre.network.name);
   
   if (!isFlowNetwork) {
-    console.log(`Skipping deployment on ${hre.network.name} - not a Flow network`);
+    console.log(`⏭️  Skipping Flow deployment on ${hre.network.name} - this script is for Flow networks only`);
     return;
   }
 
-  console.log(`Deploying YourContract to ${hre.network.name}...`);
+  console.log(`🌊 Deploying YourContract to ${hre.network.name}...`);
+  console.log(`📍 Deployer address: ${deployer}`);
 
   await deploy("YourContract", {
     from: deployer,
@@ -44,7 +45,8 @@ const deployYourContract: DeployFunction = async function (hre: HardhatRuntimeEn
 
   // Get the deployed contract to interact with it after deploying.
   const yourContract = await hre.ethers.getContract<Contract>("YourContract", deployer);
-  console.log("👋 Initial greeting:", await yourContract.greeting());
+  console.log("🎮 Contract owner:", await yourContract.owner());
+  console.log("💰 Guess fee:", await yourContract.GUESS_FEE());
 
   if (hre.network.name.includes("flow")) {
     console.log(`✅ YourContract deployed to Flow ${hre.network.name}!`);

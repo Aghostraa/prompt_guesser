@@ -371,8 +371,11 @@ const Home: NextPage = () => {
                       key={image.id}
                       className="group relative"
                       style={{
+                        animationName: "fadeInUp",
+                        animationDuration: "0.6s",
+                        animationTimingFunction: "ease-out",
+                        animationFillMode: "forwards",
                         animationDelay: `${index * 100}ms`,
-                        animation: "fadeInUp 0.6s ease-out forwards",
                       }}
                     >
                       <div className="relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl overflow-hidden border border-white/20 hover:shadow-2xl hover:shadow-purple-500/10 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2">
