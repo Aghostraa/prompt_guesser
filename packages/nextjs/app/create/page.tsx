@@ -168,7 +168,7 @@ const CreatePage = () => {
         value: parseEther(txValue),
       });
 
-      setNotification("Challenge created successfully! Redirecting...");
+      // Only Flowscan notifications will show - no app UI notifications
       setCurrentStep(5);
       setTimeout(() => router.push("/"), 3000);
     } catch (error) {

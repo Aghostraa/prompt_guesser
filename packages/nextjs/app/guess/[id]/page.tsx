@@ -190,7 +190,8 @@ const GuessPage = ({ params: paramsPromise }: { params: Promise<PageParams> }) =
         args: [BigInt(challengeData.id), guess.trim()],
         value: feeInWei,
       });
-      setNotification("Guess submitted! Waiting for confirmation...");
+      // Removed: setNotification("Guess submitted! Waiting for confirmation...");
+      // Only Flowscan notifications will show - no app UI notifications
       setGuess("");
     } catch (error: any) {
       console.error("Error submitting guess:", error);
