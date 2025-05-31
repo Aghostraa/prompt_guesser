@@ -50,6 +50,7 @@
     "verify": "yarn hardhat:verify"
   },
   "devDependencies": {
+    "@openzeppelin/hardhat-upgrades": "^3.9.0",
     "husky": "~9.1.6",
     "lint-staged": "~13.2.2"
   },
