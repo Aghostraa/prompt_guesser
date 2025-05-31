@@ -6,79 +6,50 @@ import {
   TrophyIcon,
   UserGroupIcon,
   BanknotesIcon,
+  ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 import { TrophyIcon as TrophyIconSolid, FireIcon as FireIconSolid } from "@heroicons/react/24/solid";
 import { Address } from "~~/components/scaffold-eth";
 import { useAccount } from "wagmi";
-
-interface LeaderboardEntry {
-  player: `0x${string}`;
-  totalWins: bigint;
-  totalPrizesWon: bigint;
-}
+import { BlockscoutService } from "~~/services/blockscout";
+import type { LeaderboardEntry } from "~~/services/blockscout";
 
 const LeaderboardPage = () => {
   const [activeTab, setActiveTab] = useState<'wins' | 'prizes'>('wins');
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const { address: connectedAccount } = useAccount();
 
-  // TODO: Replace mock data with Blockscout API integration
-  // The following endpoints will need to be implemented:
-  // 1. GET /api/v2/addresses/{address}/transactions - to fetch user transactions
-  // 2. GET /api/v2/transactions - to fetch all challenge-related transactions
-  // 3. Parse events from transaction logs to extract:
-  //    - ChallengeCreated events to identify challenge creators
-  //    - GuessMade events to track wins and losses
-  //    - PrizeAwarded events to calculate total prizes won
-  // 4. Aggregate data to create leaderboard rankings
-  
-  // Mock data for demonstration - REMOVE when implementing Blockscout APIs
-  const mockLeaderboardData: LeaderboardEntry[] = [
-    {
-      player: "0x1234567890123456789012345678901234567890",
-      totalWins: BigInt(5),
-      totalPrizesWon: BigInt("2500000000000000000"), // 2.5 ETH
-    },
-    {
-      player: "0x2345678901234567890123456789012345678901",
-      totalWins: BigInt(3),
-      totalPrizesWon: BigInt("1800000000000000000"), // 1.8 ETH
-    },
-    {
-      player: "0x3456789012345678901234567890123456789012",
-      totalWins: BigInt(2),
-      totalPrizesWon: BigInt("1200000000000000000"), // 1.2 ETH
-    },
-  ];
+  const fetchLeaderboardData = async (forceRefresh = false) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      if (forceRefresh) {
+        setRefreshing(true);
+        BlockscoutService.clearCache();
+      }
+      
+      const data = await BlockscoutService.getLeaderboard(activeTab, !forceRefresh);
+      setLeaderboardData(data);
+    } catch (err) {
+      console.error('Error fetching leaderboard data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch leaderboard data');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    // TODO: Implement Blockscout API calls here
-    // Example implementation structure:
-    // 
-    // const fetchLeaderboardData = async () => {
-    //   try {
-    //     // 1. Fetch all transactions related to the contract
-    //     const response = await fetch(`/api/blockscout/transactions?contract=${contractAddress}`);
-    //     const transactions = await response.json();
-    //     
-    //     // 2. Parse events from transaction logs
-    //     const events = parseContractEvents(transactions);
-    //     
-    //     // 3. Calculate leaderboard stats
-    //     const leaderboard = calculateLeaderboardStats(events);
-    //     
-    //     // 4. Sort and set data
-    //     setLeaderboardData(leaderboard);
-    //   } catch (error) {
-    //     console.error('Error fetching leaderboard data:', error);
-    //   }
-    // };
-    // 
-    // fetchLeaderboardData();
-    
-    // Using mock data for now
-    setLeaderboardData(mockLeaderboardData);
+    fetchLeaderboardData();
   }, [activeTab]);
+
+  const handleRefresh = () => {
+    fetchLeaderboardData(true);
+  };
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -106,8 +77,36 @@ const LeaderboardPage = () => {
     }
   };
 
-  // TODO: Implement real player count from Blockscout
-  const totalPlayers = mockLeaderboardData.length;
+  const totalPlayers = leaderboardData.length;
+  const cacheStatus = BlockscoutService.getCacheStatus();
+
+  if (loading && !refreshing) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-purple-950 dark:to-indigo-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-purple-500 mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600 dark:text-gray-400">Loading leaderboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !refreshing) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-purple-950 dark:to-indigo-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-xl mb-4">Error loading leaderboard</div>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">{error}</p>
+          <button
+            onClick={handleRefresh}
+            className="bg-purple-500 hover:bg-purple-600 text-white px-6 py-2 rounded-lg transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-purple-950 dark:to-indigo-950">
@@ -162,6 +161,21 @@ const LeaderboardPage = () => {
                   </div>
                 </div>
               )}
+
+              {/* Cache Status Card */}
+              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl px-6 py-4 border border-white/20 shadow-lg">
+                <div className="flex items-center space-x-3">
+                  <div className={`w-3 h-3 rounded-full ${cacheStatus.cached ? 'bg-green-500' : 'bg-gray-400'}`} />
+                  <div>
+                    <div className="text-sm font-medium text-gray-900 dark:text-white">
+                      {cacheStatus.cached ? 'Live Data' : 'Loading...'}
+                    </div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">
+                      {cacheStatus.age ? `Updated ${Math.floor(cacheStatus.age / 1000)}s ago` : 'Real-time'}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -170,36 +184,48 @@ const LeaderboardPage = () => {
       {/* Main Content */}
       <section className="relative py-12">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Tab Navigation */}
+          {/* Tab Navigation with Refresh Button */}
           <div className="flex justify-center mb-12">
             <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-2 border border-white/20 shadow-lg">
-              <div className="flex space-x-2">
+              <div className="flex items-center space-x-2">
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => setActiveTab('wins')}
+                    className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                      activeTab === 'wins'
+                        ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg transform scale-105'
+                        : 'text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <TrophyIcon className="w-5 h-5" />
+                      <span>Top Winners</span>
+                    </div>
+                  </button>
+                  
+                  <button
+                    onClick={() => setActiveTab('prizes')}
+                    className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                      activeTab === 'prizes'
+                        ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg transform scale-105'
+                        : 'text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <BanknotesIcon className="w-5 h-5" />
+                      <span>Top Earners</span>
+                    </div>
+                  </button>
+                </div>
+
+                {/* Refresh Button */}
                 <button
-                  onClick={() => setActiveTab('wins')}
-                  className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                    activeTab === 'wins'
-                      ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg transform scale-105'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400'
-                  }`}
+                  onClick={handleRefresh}
+                  disabled={refreshing}
+                  className="p-3 rounded-xl text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all duration-300 disabled:opacity-50"
+                  title="Refresh data"
                 >
-                  <div className="flex items-center space-x-2">
-                    <TrophyIcon className="w-5 h-5" />
-                    <span>Top Winners</span>
-                  </div>
-                </button>
-                
-                <button
-                  onClick={() => setActiveTab('prizes')}
-                  className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                    activeTab === 'prizes'
-                      ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg transform scale-105'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400'
-                  }`}
-                >
-                  <div className="flex items-center space-x-2">
-                    <BanknotesIcon className="w-5 h-5" />
-                    <span>Top Earners</span>
-                  </div>
+                  <ArrowPathIcon className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
                 </button>
               </div>
             </div>
@@ -221,8 +247,11 @@ const LeaderboardPage = () => {
                       <div className="mt-2 text-lg font-bold text-gray-900 dark:text-white">
                         {activeTab === 'wins' 
                           ? `${leaderboardData[1].totalWins.toString()} wins`
-                          : `${formatEther(leaderboardData[1].totalPrizesWon)} ETH`
+                          : `${formatEther(leaderboardData[1].totalPrizesWon)} FLOW`
                         }
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        {(leaderboardData[1].winRate * 100).toFixed(1)}% win rate
                       </div>
                     </div>
                   </div>
@@ -237,8 +266,11 @@ const LeaderboardPage = () => {
                       <div className="mt-3 text-xl font-bold text-black">
                         {activeTab === 'wins' 
                           ? `${leaderboardData[0].totalWins.toString()} wins`
-                          : `${formatEther(leaderboardData[0].totalPrizesWon)} ETH`
+                          : `${formatEther(leaderboardData[0].totalPrizesWon)} FLOW`
                         }
+                      </div>
+                      <div className="text-sm text-gray-800">
+                        {(leaderboardData[0].winRate * 100).toFixed(1)}% win rate
                       </div>
                     </div>
                   </div>
@@ -253,8 +285,11 @@ const LeaderboardPage = () => {
                       <div className="mt-2 text-lg font-bold text-white">
                         {activeTab === 'wins' 
                           ? `${leaderboardData[2].totalWins.toString()} wins`
-                          : `${formatEther(leaderboardData[2].totalPrizesWon)} ETH`
+                          : `${formatEther(leaderboardData[2].totalPrizesWon)} FLOW`
                         }
+                      </div>
+                      <div className="text-sm text-gray-200">
+                        {(leaderboardData[2].winRate * 100).toFixed(1)}% win rate
                       </div>
                     </div>
                   </div>
@@ -264,10 +299,18 @@ const LeaderboardPage = () => {
               {/* Full Leaderboard */}
               <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl border border-white/20 shadow-xl overflow-hidden">
                 <div className="p-6 border-b border-gray-200/50 dark:border-gray-700/50">
-                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
-                    <FireIconSolid className="w-6 h-6 mr-2 text-orange-500" />
-                    Full Rankings
-                  </h3>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                      <FireIconSolid className="w-6 h-6 mr-2 text-orange-500" />
+                      Full Rankings
+                    </h3>
+                    {refreshing && (
+                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                        <ArrowPathIcon className="w-4 h-4 mr-1 animate-spin" />
+                        Refreshing...
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
                 <div className="divide-y divide-gray-200/50 dark:divide-gray-700/50">
@@ -299,12 +342,15 @@ const LeaderboardPage = () => {
                         <div className="text-xl font-bold text-gray-900 dark:text-white">
                           {activeTab === 'wins' 
                             ? `${entry.totalWins.toString()} wins`
-                            : `${formatEther(entry.totalPrizesWon)} ETH`
+                            : `${formatEther(entry.totalPrizesWon)} FLOW`
                           }
                         </div>
-                        {activeTab === 'prizes' && entry.totalWins > 0 && (
-                          <div className="text-sm text-gray-500 dark:text-gray-400">
-                            {entry.totalWins.toString()} wins
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {entry.totalGuesses.toString()} total guesses • {(entry.winRate * 100).toFixed(1)}% win rate
+                        </div>
+                        {entry.challengesCreated > 0 && (
+                          <div className="text-xs text-blue-500 dark:text-blue-400">
+                            Created {entry.challengesCreated.toString()} challenges
                           </div>
                         )}
                       </div>
@@ -326,6 +372,13 @@ const LeaderboardPage = () => {
               <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-lg mx-auto leading-relaxed">
                 Be the first to solve a challenge and claim your spot on the leaderboard!
               </p>
+              
+              <button
+                onClick={handleRefresh}
+                className="bg-purple-500 hover:bg-purple-600 text-white px-8 py-3 rounded-xl font-semibold transition-colors shadow-lg"
+              >
+                Refresh Data
+              </button>
             </div>
           )}
         </div>

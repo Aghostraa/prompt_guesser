@@ -207,18 +207,6 @@ const Home: NextPage = () => {
         </div>
       </section>
 
-      {/* Divider */}
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-200/50 dark:border-gray-700/50"></div>
-        </div>
-        <div className="relative flex justify-center">
-          <div className="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-purple-950 dark:to-indigo-950 px-6">
-            <SparklesIcon className="w-6 h-6 text-gray-400" />
-          </div>
-        </div>
-      </div>
-
       {/* Leaderboard Preview Section */}
       <section className="relative py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -245,18 +233,6 @@ const Home: NextPage = () => {
           </div>
         </div>
       </section>
-
-      {/* Divider */}
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-200/50 dark:border-gray-700/50"></div>
-        </div>
-        <div className="relative flex justify-center">
-          <div className="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-purple-950 dark:to-indigo-950 px-6">
-            <SparklesIcon className="w-6 h-6 text-gray-400" />
-          </div>
-        </div>
-      </div>
 
       {/* Main Content Section */}
       <section className="relative py-20 lg:py-24">
