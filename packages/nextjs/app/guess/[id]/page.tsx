@@ -194,7 +194,7 @@ const GuessPage = ({ params: paramsPromise }: { params: Promise<PageParams> }) =
     try {
       await writeContractAsync({
         functionName: "makeGuess",
-        args: [BigInt(challengeData.id), guess.trim()],
+        args: [BigInt(challengeData.id), guess.trim().toLowerCase()],
         value: dynamicGuessFeeWei,
       });
       setGuess("");

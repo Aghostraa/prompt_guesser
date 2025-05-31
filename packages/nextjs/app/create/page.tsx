@@ -154,8 +154,10 @@ const CreatePage = () => {
     try {
       setIsSubmittingChallenge(true);
       setCurrentStep(4);
-      const promptBytes = stringToBytes(prompt.toLowerCase().trim());
+      const normalizedPrompt = prompt.trim().toLowerCase();
+      const promptBytes = stringToBytes(normalizedPrompt);
       const hashedPrompt = keccak256(promptBytes);
+      console.log("Normalized prompt for hashing (all whitespace removed):", normalizedPrompt);
       console.log("Hashed prompt:", hashedPrompt);
       console.log("Image URL:", generatedImageLocalPath);
       console.log("Initial Prize Pool (argument to contract _initialPrizePool):", "0");

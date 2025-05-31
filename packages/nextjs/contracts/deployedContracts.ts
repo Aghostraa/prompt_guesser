@@ -16,6 +16,11 @@ const deployedContracts = {
               name: "_owner",
               type: "address",
             },
+            {
+              internalType: "address",
+              name: "_platformWallet",
+              type: "address",
+            },
           ],
           stateMutability: "nonpayable",
           type: "constructor",
@@ -47,14 +52,45 @@ const deployedContracts = {
               name: "initialPrizePool",
               type: "uint256",
             },
+          ],
+          name: "ChallengeCreated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "challengeId",
+              type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "creator",
+              type: "address",
+            },
             {
               indexed: false,
               internalType: "uint256",
-              name: "guessFee",
+              name: "creatorAmount",
+              type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "platform",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "platformAmount",
               type: "uint256",
             },
           ],
-          name: "ChallengeCreated",
+          name: "FeeDistributed",
           type: "event",
         },
         {
@@ -75,7 +111,7 @@ const deployedContracts = {
             {
               indexed: false,
               internalType: "string",
-              name: "guessString",
+              name: "originalGuessString",
               type: "string",
             },
             {
@@ -139,32 +175,6 @@ const deployedContracts = {
           type: "event",
         },
         {
-          inputs: [],
-          name: "CREATOR_FEE_PERCENTAGE",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
-          name: "PLATFORM_FEE_PERCENTAGE",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
           inputs: [
             {
               internalType: "uint256",
@@ -207,11 +217,6 @@ const deployedContracts = {
             {
               internalType: "uint256",
               name: "creationTime",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "guessFee",
               type: "uint256",
             },
           ],
@@ -288,11 +293,6 @@ const deployedContracts = {
                   name: "creationTime",
                   type: "uint256",
                 },
-                {
-                  internalType: "uint256",
-                  name: "guessFee",
-                  type: "uint256",
-                },
               ],
               internalType: "struct YourContract.Challenge",
               name: "",
@@ -311,7 +311,12 @@ const deployedContracts = {
             },
             {
               internalType: "string",
-              name: "_guess",
+              name: "_originalGuess",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "_normalizedGuess",
               type: "string",
             },
           ],
@@ -323,6 +328,19 @@ const deployedContracts = {
         {
           inputs: [],
           name: "owner",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "platformWallet",
           outputs: [
             {
               internalType: "address",
