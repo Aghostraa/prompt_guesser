@@ -14,7 +14,7 @@
     "account:reveal-pk": "yarn workspace @se-2/hardhat account:reveal-pk",
     "chain": "yarn hardhat:chain",
     "compile": "yarn hardhat:compile",
-    "deploy": "yarn hardhat:deploy",
+    "deploy": "yarn hardhat:deploy --network flowTestnet",
     "fork": "yarn hardhat:fork",
     "format": "yarn next:format && yarn hardhat:format",
     "generate": "yarn account:generate",

@@ -135,11 +135,11 @@ const Home: NextPage = () => {
                 </h1>
                 
                 <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed font-medium">
-                  The ultimate AI prompt guessing game on the blockchain. Create stunning AI images, challenge the community, and win ETH rewards!
+                  The ultimate AI prompt guessing game on the blockchain. Create stunning AI images, challenge the community, and win FLOW rewards!
                 </p>
                 
                 <p className="text-lg text-gray-500 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
-                  Test your creativity and intuition by guessing the prompts behind AI-generated masterpieces. Every guess costs 0.1 ETH and grows the prize pool until someone cracks the code.
+                  Test your creativity and intuition by guessing the prompts behind AI-generated masterpieces. Guessing fee is 10% of the prize pool (in FLOW), with fees distributed to the creator and platform.
                 </p>
               </div>
             </div>
@@ -175,7 +175,7 @@ const Home: NextPage = () => {
                     <div className="text-2xl font-bold text-gray-900 dark:text-white">
                       {activeChallenges.reduce((total, image) => total + parseFloat(image.prizePool), 0).toFixed(2)}
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">ETH in Active Pools</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">FLOW in Active Pools</div>
                   </div>
                 </div>
               </div>
@@ -198,7 +198,7 @@ const Home: NextPage = () => {
                     or scroll down to start guessing
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-500">
-                    0.1 ETH per guess • Winner takes all
+                    Dynamic FLOW fee per guess • Winner takes prize
                   </p>
                 </div>
               </div>
@@ -399,7 +399,7 @@ const Home: NextPage = () => {
                               {(image as any).isActive ? (
                                 <>
                                   <SparklesIconSolid className="w-4 h-4" />
-                                  <span>{image.prizePool} ETH</span>
+                                  <span>{image.prizePool} FLOW</span>
                                 </>
                               ) : (
                                 <>
@@ -424,7 +424,7 @@ const Home: NextPage = () => {
                               <div className="flex items-center space-x-2">
                                 <div className="flex items-center space-x-1 text-green-600 dark:text-green-400">
                                   <BanknotesIcon className="w-5 h-5" />
-                                  <span className="text-xl font-bold">{image.prizePool} ETH</span>
+                                  <span className="text-xl font-bold">{image.prizePool} FLOW</span>
                                 </div>
                               </div>
                             ) : (

@@ -373,7 +373,7 @@ const CreatePage = () => {
 
                     <div>
                       <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
-                        Prize Pool (ETH)
+                        Prize Pool (FLOW)
                       </label>
                       <div className="relative">
                         <BanknotesIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-green-500" />
@@ -390,7 +390,7 @@ const CreatePage = () => {
                           <div className="flex items-center justify-between text-xs">
                             <span className="text-gray-500 dark:text-gray-400">
                               Your balance: <span className="font-medium text-gray-700 dark:text-gray-300">
-                                {parseFloat(formatEther(balance.value)).toFixed(4)} ETH
+                                {parseFloat(formatEther(balance.value)).toFixed(4)} FLOW
                               </span>
                             </span>
                             {prizePool && !isInsufficientBalance && (
@@ -414,7 +414,7 @@ const CreatePage = () => {
                         )}
                         
                         <p className="text-xs text-gray-500 dark:text-gray-400">
-                          This ETH will be locked in the smart contract as the reward
+                          This FLOW will be locked in the smart contract as the reward
                         </p>
                       </div>
                     </div>
@@ -467,7 +467,7 @@ const CreatePage = () => {
                         <span className="font-semibold text-green-900 dark:text-green-300">Prize Pool</span>
                       </div>
                       <p className="text-green-800 dark:text-green-200 text-lg font-bold">
-                        {prizePool} ETH
+                        {prizePool} FLOW
                       </p>
                     </div>
                   </div>
@@ -496,7 +496,7 @@ const CreatePage = () => {
                     Deploying to Blockchain
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Your challenge is being submitted to the Ethereum network...
+                    Your challenge is being submitted to the Flow network...
                   </p>
                 </div>
               )}

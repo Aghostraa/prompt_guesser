@@ -5,9 +5,9 @@
 import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 
 const deployedContracts = {
-  545: {
+  31337: {
     YourContract: {
-      address: "0x1f10F3Ba7ACB61b2F50B9d6DdCf91a6f787C0E82",
+      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
       abi: [
         {
           inputs: [
@@ -45,6 +45,12 @@ const deployedContracts = {
               indexed: false,
               internalType: "uint256",
               name: "initialPrizePool",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "guessFee",
               type: "uint256",
             },
           ],
@@ -134,7 +140,20 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "GUESS_FEE",
+          name: "CREATOR_FEE_PERCENTAGE",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "PLATFORM_FEE_PERCENTAGE",
           outputs: [
             {
               internalType: "uint256",
@@ -188,6 +207,11 @@ const deployedContracts = {
             {
               internalType: "uint256",
               name: "creationTime",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "guessFee",
               type: "uint256",
             },
           ],
@@ -262,6 +286,11 @@ const deployedContracts = {
                 {
                   internalType: "uint256",
                   name: "creationTime",
+                  type: "uint256",
+                },
+                {
+                  internalType: "uint256",
+                  name: "guessFee",
                   type: "uint256",
                 },
               ],
@@ -319,15 +348,20 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
   },
-  31337: {
+  545: {
     YourContract: {
-      address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      address: "0x3300a0e41F13117788Cfb1D9C215d10890c623d9",
       abi: [
         {
           inputs: [
             {
               internalType: "address",
               name: "_owner",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "_platformWallet",
               type: "address",
             },
           ],
@@ -363,6 +397,43 @@ const deployedContracts = {
             },
           ],
           name: "ChallengeCreated",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "uint256",
+              name: "challengeId",
+              type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "creator",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "creatorAmount",
+              type: "uint256",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "platform",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "platformAmount",
+              type: "uint256",
+            },
+          ],
+          name: "FeeDistributed",
           type: "event",
         },
         {
@@ -445,19 +516,6 @@ const deployedContracts = {
           ],
           name: "PrizePoolIncreased",
           type: "event",
-        },
-        {
-          inputs: [],
-          name: "GUESS_FEE",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
         },
         {
           inputs: [
@@ -608,6 +666,19 @@ const deployedContracts = {
         {
           inputs: [],
           name: "owner",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "platformWallet",
           outputs: [
             {
               internalType: "address",
