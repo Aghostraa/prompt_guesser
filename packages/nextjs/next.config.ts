@@ -15,7 +15,13 @@ const nextConfig: NextConfig = {
     return config;
   },
   images: {
-    domains: ["picsum.photos", "oaidalleapiprodscus.blob.core.windows.net"],
+    domains: [
+      "picsum.photos", 
+      "oaidalleapiprodscus.blob.core.windows.net",
+      "ipfs.io",
+      "gateway.pinata.cloud",
+      "cloudflare-ipfs.com"
+    ],
   },
 };
 

@@ -563,6 +563,7 @@ const CreatePage = () => {
                         src={generatedImageLocalPath} 
                         alt="AI Generated Challenge Image" 
                         fill 
+                        sizes="(max-width: 768px) 100vw, 50vw"
                         className="object-cover" 
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
