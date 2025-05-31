@@ -1,8 +1,8 @@
+import { useNotification } from "@blockscout/app-sdk";
 import { Hash, SendTransactionParameters, TransactionReceipt, WalletClient } from "viem";
 import { Config, useWalletClient } from "wagmi";
 import { getPublicClient } from "wagmi/actions";
 import { SendTransactionMutate } from "wagmi/query";
-import { useNotification } from "@blockscout/app-sdk";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 import { getBlockExplorerTxLink, getParsedError, notification } from "~~/utils/scaffold-eth";
 import { TransactorFuncOptions } from "~~/utils/scaffold-eth/contract";
@@ -21,7 +21,7 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
   let walletClient = _walletClient;
   const { data } = useWalletClient();
   const { openTxToast } = useNotification();
-  
+
   if (walletClient === undefined && data) {
     walletClient = data;
   }
@@ -35,7 +35,7 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
 
     let transactionHash: Hash | undefined = undefined;
     let transactionReceipt: TransactionReceipt | undefined;
-    
+
     try {
       const network = await walletClient.getChainId();
       // Get full transaction from public client
@@ -69,7 +69,7 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
                   View on Explorer
                 </a>
               )}
-            </div>
+            </div>,
           );
         }
       }
@@ -97,7 +97,6 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
       // );
 
       if (options?.onBlockConfirmation) options.onBlockConfirmation(transactionReceipt);
-      
     } catch (error: any) {
       console.error("⚡️ ~ file: useTransactor.ts ~ error", error);
       const message = getParsedError(error);

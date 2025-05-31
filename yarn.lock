@@ -10868,7 +10868,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ethereumjs-util@npm:^6.0.0, ethereumjs-util@npm:^6.2.1, ethereumjs-util@npm:^7.0.3, ethereumjs-util@npm:^7.1.5":
+"ethereumjs-util@npm:^6.0.0, ethereumjs-util@npm:^6.2.1":
   version: 6.2.1
   resolution: "ethereumjs-util@npm:6.2.1"
   dependencies:
@@ -10883,7 +10883,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ethereumjs-util@npm:^7.1.4":
+"ethereumjs-util@npm:^7.0.3, ethereumjs-util@npm:^7.1.4, ethereumjs-util@npm:^7.1.5":
   version: 7.1.5
   resolution: "ethereumjs-util@npm:7.1.5"
   dependencies:
@@ -11962,7 +11962,7 @@ __metadata:
     hsl-rgb: ^1.0.0
     hsl-triad: ^1.0.0
     string-hash: ^1.1.3
-  checksum: 11b149cc65069e705a1909e3bcf7e6ed6495592d2c3bd6d64736af2015635058cf004a42aba9e46b4f37373384b97b90f2e55a10c48c670d9e0b313f28036044
+  checksum: e03701060ca52088b489acdfa3582309f9b9f0513889947ea4b4e4bbbfb139b8379e649400a1ea9d5f7a0ab3bbd523b782bb6bef9e6acf86056d8da2e44cdf05
   languageName: node
   linkType: hard
 

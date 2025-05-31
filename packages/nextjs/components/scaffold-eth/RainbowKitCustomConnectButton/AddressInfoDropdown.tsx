@@ -55,9 +55,7 @@ export const AddressInfoDropdown = ({
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {isENS(displayName) ? displayName : checkSumAddress?.slice(0, 6) + "..." + checkSumAddress?.slice(-4)}
             </span>
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              Wallet
-            </span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">Wallet</span>
           </div>
           <ChevronDownIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
         </summary>
@@ -82,13 +80,19 @@ export const AddressInfoDropdown = ({
             </div>
           </li>
           <li className={selectingNetwork ? "hidden" : ""}>
-            <label htmlFor="qrcode-modal" className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl cursor-pointer transition-colors">
+            <label
+              htmlFor="qrcode-modal"
+              className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl cursor-pointer transition-colors"
+            >
               <QrCodeIcon className="h-5 w-5 text-gray-500" />
               <span className="text-sm font-medium">View QR Code</span>
             </label>
           </li>
           <li className={selectingNetwork ? "hidden" : ""}>
-            <button className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl cursor-pointer transition-colors w-full text-left" type="button">
+            <button
+              className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl cursor-pointer transition-colors w-full text-left"
+              type="button"
+            >
               <ArrowTopRightOnSquareIcon className="h-5 w-5 text-gray-500" />
               <a
                 target="_blank"

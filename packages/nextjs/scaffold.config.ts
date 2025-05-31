@@ -14,9 +14,9 @@ export const DEFAULT_ALCHEMY_API_KEY = "oKxs-03sij-U_N0iOlrSsZFr29-IqbuF";
 const scaffoldConfig = {
   // The networks on which your DApp is live
   targetNetworks: [
-    chains.flowTestnet,     // Flow EVM Testnet
+    chains.flowTestnet, // Flow EVM Testnet
     chains.hardhat,
-    chains.flowMainnet,     // Flow EVM Mainnet
+    chains.flowMainnet, // Flow EVM Mainnet
     // chains.flowPreviewnet,  // Flow EVM Previewnet (uncomment if needed)
   ],
 

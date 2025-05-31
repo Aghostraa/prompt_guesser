@@ -4,14 +4,7 @@ import React, { useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { hardhat } from "viem/chains";
-import { 
-  Bars3Icon, 
-  BugAntIcon, 
-  HomeIcon,
-  SparklesIcon,
-  PlusIcon,
-  TrophyIcon
-} from "@heroicons/react/24/outline";
+import { Bars3Icon, BugAntIcon, HomeIcon, PlusIcon, SparklesIcon, TrophyIcon } from "@heroicons/react/24/outline";
 import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { useOutsideClick, useTargetNetwork } from "~~/hooks/scaffold-eth";
 
@@ -57,8 +50,8 @@ export const HeaderMenuLinks = () => {
               href={href}
               passHref
               className={`${
-                isActive 
-                  ? "bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-purple-600 dark:text-purple-400 shadow-lg backdrop-blur-sm border border-purple-200/50 dark:border-purple-400/20" 
+                isActive
+                  ? "bg-gradient-to-r from-purple-500/20 to-blue-500/20 text-purple-600 dark:text-purple-400 shadow-lg backdrop-blur-sm border border-purple-200/50 dark:border-purple-400/20"
                   : "text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-800/50 hover:text-purple-600 dark:hover:text-purple-400"
               } transition-all duration-300 py-2.5 px-4 text-sm rounded-2xl gap-2 flex items-center font-medium hover:shadow-md hover:backdrop-blur-sm hover:border hover:border-white/20`}
             >
@@ -114,9 +107,7 @@ export const Header = () => {
                 <div className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                   Prompt Guesser
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 -mt-1">
-                  AI Guessing Game
-                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 -mt-1">AI Guessing Game</div>
               </div>
             </Link>
 

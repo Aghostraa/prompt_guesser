@@ -4,23 +4,20 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { keccak256, parseEther, stringToBytes, formatEther } from "viem";
+import { formatEther, keccak256, parseEther, stringToBytes } from "viem";
 import { useAccount, useBalance } from "wagmi";
-import { 
+import {
   ArrowLeftIcon,
-  SparklesIcon,
-  PhotoIcon,
-  LockClosedIcon,
+  BanknotesIcon,
   CheckCircleIcon,
+  CpuChipIcon,
   ExclamationTriangleIcon,
   EyeIcon,
-  BanknotesIcon,
-  CpuChipIcon
+  LockClosedIcon,
+  PhotoIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
-import { 
-  SparklesIcon as SparklesIconSolid,
-  CheckCircleIcon as CheckCircleIconSolid
-} from "@heroicons/react/24/solid";
+import { CheckCircleIcon as CheckCircleIconSolid, SparklesIcon as SparklesIconSolid } from "@heroicons/react/24/solid";
 import { EtherInput } from "~~/components/scaffold-eth";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { useTargetNetwork } from "~~/hooks/scaffold-eth/useTargetNetwork";
@@ -95,12 +92,12 @@ const CreatePage = () => {
 
     setIsGenerating(true);
     setCurrentStep(2);
-    
+
     try {
-      const response = await fetch('/api/generate-image', {
-        method: 'POST',
+      const response = await fetch("/api/generate-image", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ prompt }),
       });
@@ -109,12 +106,14 @@ const CreatePage = () => {
 
       if (!response.ok) {
         // Handle specific OpenAI content policy violations gracefully
-        if (response.status === 400 && data.error?.includes('content policy')) {
-          setNotification("Error: Your prompt may contain inappropriate content. Please try rephrasing with family-friendly language.");
-        } else if (data.error?.includes('usage policies')) {
+        if (response.status === 400 && data.error?.includes("content policy")) {
+          setNotification(
+            "Error: Your prompt may contain inappropriate content. Please try rephrasing with family-friendly language.",
+          );
+        } else if (data.error?.includes("usage policies")) {
           setNotification("Error: Please rephrase your prompt to comply with content guidelines.");
         } else {
-          setNotification(`Error: ${data.error || 'Failed to generate image. Please try again.'}`);
+          setNotification(`Error: ${data.error || "Failed to generate image. Please try again."}`);
         }
         setCurrentStep(1); // Go back to step 1 on error
         return; // Don't throw error, just return
@@ -129,7 +128,7 @@ const CreatePage = () => {
       }
     } catch (error) {
       // Only console.warn for network errors, not user input errors
-      console.warn('Network error during image generation:', error);
+      console.warn("Network error during image generation:", error);
       setNotification("Error: Network error occurred. Please check your connection and try again.");
       setCurrentStep(1); // Go back to step 1 on error
     } finally {
@@ -175,10 +174,12 @@ const CreatePage = () => {
       setTimeout(() => router.push("/"), 3000);
     } catch (error) {
       console.error("Error creating challenge:", error);
-      
+
       // Provide Flow-specific error guidance
       if (targetNetwork.id === 545 || targetNetwork.id === 747) {
-        setNotification("Error: Failed to create challenge on Flow network. Make sure Flow network is added to your wallet and you have FLOW tokens for gas fees.");
+        setNotification(
+          "Error: Failed to create challenge on Flow network. Make sure Flow network is added to your wallet and you have FLOW tokens for gas fees.",
+        );
       } else {
         setNotification("Error: Failed to create challenge. Check console for details.");
       }
@@ -193,7 +194,7 @@ const CreatePage = () => {
     { id: 2, title: "Generate Image", description: "AI creates your image", icon: CpuChipIcon },
     { id: 3, title: "Review & Deploy", description: "Lock in your challenge", icon: LockClosedIcon },
     { id: 4, title: "Deploying", description: "Submitting to blockchain", icon: BanknotesIcon },
-    { id: 5, title: "Complete", description: "Challenge is live!", icon: CheckCircleIcon }
+    { id: 5, title: "Complete", description: "Challenge is live!", icon: CheckCircleIcon },
   ];
 
   return (
@@ -203,8 +204,8 @@ const CreatePage = () => {
         <div className="fixed top-24 right-4 z-50 animate-fade-in">
           <div
             className={`alert ${
-              notification.startsWith("Error") 
-                ? "bg-red-500/90 text-white border-red-600" 
+              notification.startsWith("Error")
+                ? "bg-red-500/90 text-white border-red-600"
                 : "bg-green-500/90 text-white border-green-600"
             } shadow-2xl backdrop-blur-lg border rounded-2xl max-w-sm`}
           >
@@ -224,8 +225,8 @@ const CreatePage = () => {
       <div className="relative pt-8 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center space-x-4 mb-8">
-            <Link 
-              href="/" 
+            <Link
+              href="/"
               className="group flex items-center space-x-2 bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border border-white/20 rounded-2xl px-4 py-2 hover:bg-white/90 dark:hover:bg-gray-800/90 transition-all duration-300"
             >
               <ArrowLeftIcon className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
@@ -258,7 +259,7 @@ const CreatePage = () => {
               const isCompleted = currentStep > step.id;
               const isCurrent = currentStep === step.id;
               const IconComponent = step.icon;
-              
+
               return (
                 <div key={step.id} className="flex items-center">
                   <div className="flex flex-col items-center space-y-2">
@@ -267,8 +268,8 @@ const CreatePage = () => {
                         isCompleted
                           ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white scale-110"
                           : isCurrent
-                          ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white scale-110 animate-pulse"
-                          : "bg-gray-200 dark:bg-gray-700 text-gray-400"
+                            ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white scale-110 animate-pulse"
+                            : "bg-gray-200 dark:bg-gray-700 text-gray-400"
                       }`}
                     >
                       {isCompleted ? (
@@ -278,18 +279,20 @@ const CreatePage = () => {
                       )}
                     </div>
                     <div className="text-center">
-                      <div className={`text-sm font-semibold ${isCurrent ? "text-purple-600 dark:text-purple-400" : "text-gray-600 dark:text-gray-400"}`}>
+                      <div
+                        className={`text-sm font-semibold ${isCurrent ? "text-purple-600 dark:text-purple-400" : "text-gray-600 dark:text-gray-400"}`}
+                      >
                         {step.title}
                       </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-500">
-                        {step.description}
-                      </div>
+                      <div className="text-xs text-gray-500 dark:text-gray-500">{step.description}</div>
                     </div>
                   </div>
                   {index < steps.length - 1 && (
                     <div
                       className={`w-16 h-1 mx-4 transition-all duration-500 ${
-                        currentStep > step.id ? "bg-gradient-to-r from-green-500 to-emerald-500" : "bg-gray-200 dark:bg-gray-700"
+                        currentStep > step.id
+                          ? "bg-gradient-to-r from-green-500 to-emerald-500"
+                          : "bg-gray-200 dark:bg-gray-700"
                       }`}
                     />
                   )}
@@ -313,9 +316,7 @@ const CreatePage = () => {
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-200 mb-2">
-                    Using Flow Network
-                  </h3>
+                  <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-200 mb-2">Using Flow Network</h3>
                   <div className="text-sm text-blue-800 dark:text-blue-300 space-y-2">
                     <p>
                       You're creating a challenge on <strong>{targetNetwork.name}</strong>. Make sure you have:
@@ -326,7 +327,8 @@ const CreatePage = () => {
                       <li>Sufficient balance for the prize pool amount</li>
                     </ul>
                     <p className="text-xs text-blue-600 dark:text-blue-400 mt-3">
-                      If you need to add Flow network to MetaMask, switch networks and use the "Add Flow to MetaMask" option.
+                      If you need to add Flow network to MetaMask, switch networks and use the "Add Flow to MetaMask"
+                      option.
                     </p>
                   </div>
                 </div>
@@ -342,9 +344,7 @@ const CreatePage = () => {
               {currentStep === 1 && (
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                      Define Your Challenge
-                    </h2>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Define Your Challenge</h2>
                     <p className="text-gray-600 dark:text-gray-400">
                       Create a unique prompt and set the prize pool for your challenge
                     </p>
@@ -379,19 +379,16 @@ const CreatePage = () => {
                       </label>
                       <div className="relative">
                         <BanknotesIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-green-500" />
-                        <EtherInput
-                          value={prizePool}
-                          onChange={value => setPrizePool(value)}
-                          placeholder="0.1"
-                        />
+                        <EtherInput value={prizePool} onChange={value => setPrizePool(value)} placeholder="0.1" />
                       </div>
-                      
+
                       {/* Balance display and validation */}
                       <div className="mt-2 space-y-1">
                         {balance && connectedAddress && (
                           <div className="flex items-center justify-between text-xs">
                             <span className="text-gray-500 dark:text-gray-400">
-                              Your balance: <span className="font-medium text-gray-700 dark:text-gray-300">
+                              Your balance:{" "}
+                              <span className="font-medium text-gray-700 dark:text-gray-300">
                                 {parseFloat(formatEther(balance.value)).toFixed(4)} FLOW
                               </span>
                             </span>
@@ -407,14 +404,14 @@ const CreatePage = () => {
                             <span>Connect your wallet to see your balance</span>
                           </div>
                         )}
-                        
+
                         {isInsufficientBalance && (
                           <div className="flex items-center space-x-1 text-red-600 dark:text-red-400 text-xs">
                             <ExclamationTriangleIcon className="w-4 h-4" />
                             <span>Insufficient balance for this prize pool</span>
                           </div>
                         )}
-                        
+
                         <p className="text-xs text-gray-500 dark:text-gray-400">
                           This FLOW will be locked in the smart contract as the reward
                         </p>
@@ -430,12 +427,7 @@ const CreatePage = () => {
                   >
                     <div className="flex items-center justify-center space-x-2">
                       <SparklesIcon className="w-5 h-5" />
-                      <span>
-                        {isInsufficientBalance 
-                          ? "Insufficient Balance" 
-                          : "Generate AI Image"
-                        }
-                      </span>
+                      <span>{isInsufficientBalance ? "Insufficient Balance" : "Generate AI Image"}</span>
                     </div>
                   </button>
                 </div>
@@ -444,9 +436,7 @@ const CreatePage = () => {
               {currentStep >= 3 && generatedImageLocalPath && (
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                      Review & Deploy
-                    </h2>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Review & Deploy</h2>
                     <p className="text-gray-600 dark:text-gray-400">
                       Confirm your challenge details and deploy to the blockchain
                     </p>
@@ -458,9 +448,7 @@ const CreatePage = () => {
                         <SparklesIcon className="w-5 h-5 text-purple-600" />
                         <span className="font-semibold text-purple-900 dark:text-purple-300">Your Prompt</span>
                       </div>
-                      <p className="text-purple-800 dark:text-purple-200 text-sm">
-                        &quot;{prompt}&quot;
-                      </p>
+                      <p className="text-purple-800 dark:text-purple-200 text-sm">&quot;{prompt}&quot;</p>
                     </div>
 
                     <div className="bg-green-50 dark:bg-green-900/20 rounded-2xl p-4 border border-green-200 dark:border-green-700">
@@ -468,9 +456,7 @@ const CreatePage = () => {
                         <BanknotesIcon className="w-5 h-5 text-green-600" />
                         <span className="font-semibold text-green-900 dark:text-green-300">Prize Pool</span>
                       </div>
-                      <p className="text-green-800 dark:text-green-200 text-lg font-bold">
-                        {prizePool} FLOW
-                      </p>
+                      <p className="text-green-800 dark:text-green-200 text-lg font-bold">{prizePool} FLOW</p>
                     </div>
                   </div>
 
@@ -494,9 +480,7 @@ const CreatePage = () => {
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full mb-6 animate-spin">
                     <CpuChipIcon className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
-                    Deploying to Blockchain
-                  </h3>
+                  <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">Deploying to Blockchain</h3>
                   <p className="text-gray-600 dark:text-gray-400">
                     Your challenge is being submitted to the Flow network...
                   </p>
@@ -530,12 +514,8 @@ const CreatePage = () => {
             <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                    Image Preview
-                  </h2>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    Your AI-generated challenge image
-                  </p>
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Image Preview</h2>
+                  <p className="text-gray-600 dark:text-gray-400">Your AI-generated challenge image</p>
                 </div>
 
                 <div className="relative">
@@ -549,9 +529,7 @@ const CreatePage = () => {
                           <div className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                             AI is creating your image...
                           </div>
-                          <div className="text-gray-600 dark:text-gray-400">
-                            This may take a few moments
-                          </div>
+                          <div className="text-gray-600 dark:text-gray-400">This may take a few moments</div>
                         </div>
                       </div>
                     </div>
@@ -559,11 +537,12 @@ const CreatePage = () => {
 
                   {generatedImageLocalPath && !isGenerating && (
                     <div className="relative aspect-square overflow-hidden rounded-2xl border-4 border-gradient-to-r from-purple-200 to-blue-200 dark:from-purple-700 dark:to-blue-700">
-                      <Image 
-                        src={generatedImageLocalPath} 
-                        alt="AI Generated Challenge Image" 
-                        fill 
-                        className="object-cover" 
+                      <Image
+                        src={generatedImageLocalPath}
+                        alt="AI Generated Challenge Image"
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-cover"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                       <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
@@ -577,9 +556,7 @@ const CreatePage = () => {
                       <div className="text-center space-y-4">
                         <PhotoIcon className="w-16 h-16 text-gray-400 mx-auto" />
                         <div>
-                          <div className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                            Image Preview
-                          </div>
+                          <div className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Image Preview</div>
                           <div className="text-gray-600 dark:text-gray-400 text-sm">
                             Your AI-generated image will appear here after you provide a prompt and generate it
                           </div>
@@ -596,8 +573,8 @@ const CreatePage = () => {
                       <span className="font-semibold text-blue-900 dark:text-blue-300">Challenge Image</span>
                     </div>
                     <p className="text-blue-800 dark:text-blue-200 text-sm">
-                      This image will be shown to players who attempt to guess your prompt. 
-                      Make sure it represents your prompt well!
+                      This image will be shown to players who attempt to guess your prompt. Make sure it represents your
+                      prompt well!
                     </p>
                   </div>
                 )}

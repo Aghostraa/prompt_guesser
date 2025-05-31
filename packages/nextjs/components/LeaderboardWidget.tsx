@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { formatEther } from "viem";
-import { TrophyIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { ChevronRightIcon, TrophyIcon } from "@heroicons/react/24/outline";
 import { TrophyIcon as TrophyIconSolid } from "@heroicons/react/24/solid";
 import { Address } from "~~/components/scaffold-eth";
 import { BlockscoutService } from "~~/services/blockscout";
@@ -15,10 +15,10 @@ interface LeaderboardWidgetProps {
   showByPrizes?: boolean;
 }
 
-export const LeaderboardWidget = ({ 
-  title = "Top Players", 
+export const LeaderboardWidget = ({
+  title = "Top Players",
   maxItems = 5,
-  showByPrizes = false 
+  showByPrizes = false,
 }: LeaderboardWidgetProps) => {
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,12 +29,12 @@ export const LeaderboardWidget = ({
       try {
         setLoading(true);
         setError(null);
-        
-        const data = await BlockscoutService.getLeaderboard(showByPrizes ? 'prizes' : 'wins', true);
+
+        const data = await BlockscoutService.getLeaderboard(showByPrizes ? "prizes" : "wins", true);
         setLeaderboardData(data.slice(0, maxItems));
       } catch (err) {
-        console.error('Error fetching leaderboard data:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch leaderboard data');
+        console.error("Error fetching leaderboard data:", err);
+        setError(err instanceof Error ? err.message : "Failed to fetch leaderboard data");
       } finally {
         setLoading(false);
       }
@@ -76,9 +76,7 @@ export const LeaderboardWidget = ({
         <div className="p-6 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-purple-50/50 to-blue-50/50 dark:from-purple-900/10 dark:to-blue-900/10">
           <div className="flex items-center space-x-3">
             <TrophyIconSolid className="w-6 h-6 text-purple-500" />
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-              {title}
-            </h3>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">{title}</h3>
           </div>
         </div>
         <div className="p-8 text-center">
@@ -96,9 +94,7 @@ export const LeaderboardWidget = ({
         <div className="p-6 border-b border-gray-200/50 dark:border-gray-700/50 bg-gradient-to-r from-purple-50/50 to-blue-50/50 dark:from-purple-900/10 dark:to-blue-900/10">
           <div className="flex items-center space-x-3">
             <TrophyIconSolid className="w-6 h-6 text-purple-500" />
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-              {title}
-            </h3>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">{title}</h3>
           </div>
         </div>
         <div className="p-8 text-center">
@@ -117,12 +113,8 @@ export const LeaderboardWidget = ({
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/20 dark:to-blue-900/20 rounded-full mb-4">
             <TrophyIcon className="w-8 h-8 text-purple-500" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-            No Champions Yet
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">
-            Be the first to claim your spot!
-          </p>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No Champions Yet</h3>
+          <p className="text-gray-600 dark:text-gray-400 text-sm">Be the first to claim your spot!</p>
         </div>
       </div>
     );
@@ -135,11 +127,9 @@ export const LeaderboardWidget = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <TrophyIconSolid className="w-6 h-6 text-purple-500" />
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-              {title}
-            </h3>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">{title}</h3>
           </div>
-          <Link 
+          <Link
             href="/leaderboard"
             className="flex items-center space-x-1 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors duration-200 text-sm font-medium"
           >
@@ -152,32 +142,31 @@ export const LeaderboardWidget = ({
       {/* Leaderboard List */}
       <div className="divide-y divide-gray-200/50 dark:divide-gray-700/50">
         {leaderboardData.map((entry, index) => (
-          <div 
-            key={entry.player} 
+          <div
+            key={entry.player}
             className="p-4 hover:bg-white/50 dark:hover:bg-gray-700/50 transition-all duration-200"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${getRankBadgeColor(index + 1)} shadow-sm text-sm font-bold`}>
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center ${getRankBadgeColor(index + 1)} shadow-sm text-sm font-bold`}
+                >
                   {index < 3 ? getRankIcon(index + 1) : `#${index + 1}`}
                 </div>
-                
+
                 <div className="min-w-0">
                   <Address address={entry.player} size="sm" />
                 </div>
               </div>
-              
+
               <div className="text-right">
                 <div className="text-lg font-bold text-gray-900 dark:text-white">
-                  {showByPrizes 
+                  {showByPrizes
                     ? `${parseFloat(formatEther(entry.totalPrizesWon)).toFixed(2)} FLOW`
-                    : `${entry.totalWins.toString()} wins`
-                  }
+                    : `${entry.totalWins.toString()} wins`}
                 </div>
                 {showByPrizes && entry.totalWins > 0 && (
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                    {entry.totalWins.toString()} wins
-                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{entry.totalWins.toString()} wins</div>
                 )}
                 {!showByPrizes && entry.totalPrizesWon > 0 && (
                   <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -192,7 +181,7 @@ export const LeaderboardWidget = ({
 
       {/* Footer */}
       <div className="p-4 bg-gradient-to-r from-purple-50/30 to-blue-50/30 dark:from-purple-900/5 dark:to-blue-900/5 border-t border-gray-200/50 dark:border-gray-700/50">
-        <Link 
+        <Link
           href="/leaderboard"
           className="w-full flex items-center justify-center space-x-2 py-3 text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors duration-200 font-medium rounded-xl hover:bg-white/50 dark:hover:bg-gray-700/30"
         >
@@ -203,4 +192,4 @@ export const LeaderboardWidget = ({
       </div>
     </div>
   );
-}; 
+};
