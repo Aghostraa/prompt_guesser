@@ -2,6 +2,7 @@ import { Hash, SendTransactionParameters, TransactionReceipt, WalletClient } fro
 import { Config, useWalletClient } from "wagmi";
 import { getPublicClient } from "wagmi/actions";
 import { SendTransactionMutate } from "wagmi/query";
+import { useNotification } from "@blockscout/app-sdk";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
 import { getBlockExplorerTxLink, getParsedError, notification } from "~~/utils/scaffold-eth";
 import { TransactorFuncOptions } from "~~/utils/scaffold-eth/contract";
@@ -12,22 +13,6 @@ type TransactionFunc = (
 ) => Promise<Hash | undefined>;
 
 /**
- * Custom notification content for TXs.
- */
-const TxnNotification = ({ message, blockExplorerLink }: { message: string; blockExplorerLink?: string }) => {
-  return (
-    <div className={`flex flex-col ml-1 cursor-default`}>
-      <p className="my-0">{message}</p>
-      {blockExplorerLink && blockExplorerLink.length > 0 ? (
-        <a href={blockExplorerLink} target="_blank" rel="noreferrer" className="block link text-md">
-          check out transaction
-        </a>
-      ) : null}
-    </div>
-  );
-};
-
-/**
  * Runs Transaction passed in to returned function showing UI feedback.
  * @param _walletClient - Optional wallet client to use. If not provided, will use the one from useWalletClient.
  * @returns function that takes in transaction function as callback, shows UI feedback for transaction and returns a promise of the transaction hash
@@ -35,6 +20,8 @@ const TxnNotification = ({ message, blockExplorerLink }: { message: string; bloc
 export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => {
   let walletClient = _walletClient;
   const { data } = useWalletClient();
+  const { openTxToast } = useNotification();
+  
   if (walletClient === undefined && data) {
     walletClient = data;
   }
@@ -46,16 +33,15 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
       return;
     }
 
-    let notificationId = null;
     let transactionHash: Hash | undefined = undefined;
     let transactionReceipt: TransactionReceipt | undefined;
-    let blockExplorerTxURL = "";
+    
     try {
       const network = await walletClient.getChainId();
       // Get full transaction from public client
       const publicClient = getPublicClient(wagmiConfig);
 
-      notificationId = notification.loading(<TxnNotification message="Awaiting for user confirmation" />);
+      // Execute the transaction
       if (typeof tx === "function") {
         // Tx is already prepared by the caller
         const result = await tx();
@@ -65,43 +51,58 @@ export const useTransactor = (_walletClient?: WalletClient): TransactionFunc => 
       } else {
         throw new Error("Incorrect transaction passed to transactor");
       }
-      notification.remove(notificationId);
 
-      blockExplorerTxURL = network ? getBlockExplorerTxLink(network, transactionHash) : "";
+      // Show ONLY Flowscan notification - no app notifications at all
+      if (transactionHash) {
+        try {
+          await openTxToast(network.toString(), transactionHash);
+          console.log("🌊 Flowscan notification shown for transaction:", transactionHash);
+        } catch (error) {
+          console.warn("Failed to show Flowscan transaction toast:", error);
+          // If Flowscan fails, show minimal fallback
+          const blockExplorerURL = getBlockExplorerTxLink(network, transactionHash);
+          notification.loading(
+            <div className="flex flex-col">
+              <span>Transaction submitted...</span>
+              {blockExplorerURL && (
+                <a href={blockExplorerURL} target="_blank" rel="noreferrer" className="text-blue-500 underline text-sm">
+                  View on Explorer
+                </a>
+              )}
+            </div>
+          );
+        }
+      }
 
-      notificationId = notification.loading(
-        <TxnNotification message="Waiting for transaction to complete." blockExplorerLink={blockExplorerTxURL} />,
-      );
-
+      // Wait for transaction confirmation
       transactionReceipt = await publicClient.waitForTransactionReceipt({
         hash: transactionHash,
         confirmations: options?.blockConfirmations,
       });
-      notification.remove(notificationId);
 
       if (transactionReceipt.status === "reverted") throw new Error("Transaction reverted");
 
-      notification.success(
-        <TxnNotification message="Transaction completed successfully!" blockExplorerLink={blockExplorerTxURL} />,
-        {
-          icon: "🎉",
-        },
-      );
+      // Optional: Simple completion notification with link (you can remove this if you want ONLY Flowscan)
+      // const blockExplorerURL = getBlockExplorerTxLink(network, transactionHash);
+      // notification.success(
+      //   <div className="flex flex-col">
+      //     <span>Transaction completed!</span>
+      //     {blockExplorerURL && (
+      //       <a href={blockExplorerURL} target="_blank" rel="noreferrer" className="text-blue-500 underline text-sm">
+      //         View on Flowscan
+      //       </a>
+      //     )}
+      //   </div>,
+      //   { duration: 4000 }
+      // );
 
       if (options?.onBlockConfirmation) options.onBlockConfirmation(transactionReceipt);
+      
     } catch (error: any) {
-      if (notificationId) {
-        notification.remove(notificationId);
-      }
       console.error("⚡️ ~ file: useTransactor.ts ~ error", error);
       const message = getParsedError(error);
 
-      // if receipt was reverted, show notification with block explorer link and return error
-      if (transactionReceipt?.status === "reverted") {
-        notification.error(<TxnNotification message={message} blockExplorerLink={blockExplorerTxURL} />);
-        throw error;
-      }
-
+      // Only show error notification if transaction fails
       notification.error(message);
       throw error;
     }

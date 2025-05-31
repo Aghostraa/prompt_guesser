@@ -39,12 +39,11 @@ interface ChallengeData {
   id: string;
   imageUrl: string;
   prizePool: string;
+  rawPrizePool: bigint;
   creator: `0x${string}`;
   isActive: boolean;
   guesses: Guess[];
 }
-
-const FIXED_GUESS_FEE_ETH = "0.1";
 
 const GuessPage = ({ params: paramsPromise }: { params: Promise<PageParams> }) => {
   const resolvedParams = use(paramsPromise);
@@ -53,12 +52,14 @@ const GuessPage = ({ params: paramsPromise }: { params: Promise<PageParams> }) =
 
   const [guess, setGuess] = useState("");
   const [challengeData, setChallengeData] = useState<ChallengeData | null>(null);
+  const [dynamicGuessFeeWei, setDynamicGuessFeeWei] = useState<bigint | null>(null);
+  const [dynamicGuessFeeEth, setDynamicGuessFeeEth] = useState<string | null>(null);
   const [isGuessingTxLoading, setIsGuessingTxLoading] = useState(false);
   const [notification, setNotification] = useState("");
 
   const challengeIdBigInt = resolvedParams.id ? BigInt(resolvedParams.id) : undefined;
 
-  const { data: fetchedChallengeData, isLoading: isLoadingChallengeDetails } = useScaffoldReadContract({
+  const { data: fetchedChallengeData, isLoading: isLoadingChallengeDetails, refetch: refetchChallengeDetails } = useScaffoldReadContract({
     contractName: "YourContract",
     functionName: "getChallenge",
     args: [challengeIdBigInt],
@@ -82,10 +83,25 @@ const GuessPage = ({ params: paramsPromise }: { params: Promise<PageParams> }) =
   useEffect(() => {
     if (fetchedChallengeData) {
       const contractChallenge = fetchedChallengeData as any;
+      const rawPrize = contractChallenge.prizePool !== undefined ? BigInt(contractChallenge.prizePool) : BigInt(0);
+      let currentDynamicGuessFeeWei = BigInt(0);
+      let currentDynamicGuessFeeEth = "0";
+
+      if (rawPrize > 0 && contractChallenge.isActive) {
+        currentDynamicGuessFeeWei = rawPrize / BigInt(10);
+        currentDynamicGuessFeeEth = formatEther(currentDynamicGuessFeeWei);
+      } else {
+        currentDynamicGuessFeeWei = BigInt(0);
+        currentDynamicGuessFeeEth = "0";
+      }
+      setDynamicGuessFeeWei(currentDynamicGuessFeeWei);
+      setDynamicGuessFeeEth(currentDynamicGuessFeeEth);
+
       setChallengeData({
         id: contractChallenge.id.toString(),
         imageUrl: contractChallenge.imageUrl,
-        prizePool: formatEther(contractChallenge.prizePool),
+        prizePool: formatEther(rawPrize),
+        rawPrizePool: rawPrize,
         creator: contractChallenge.creator as `0x${string}`,
         isActive: contractChallenge.isActive,
         guesses: [],
@@ -94,61 +110,43 @@ const GuessPage = ({ params: paramsPromise }: { params: Promise<PageParams> }) =
   }, [fetchedChallengeData]);
 
   useEffect(() => {
-    if (guessEvents && fetchedChallengeData) {
+    if (guessEvents && fetchedChallengeData && challengeData) {
       const contractData = fetchedChallengeData as any;
+      let currentIsActive = contractData.isActive !== undefined ? contractData.isActive : true;
+      let currentRawPrizePool = challengeData.rawPrizePool;
 
-      try {
-        const formattedGuesses = guessEvents
-          .map(event => {
-            // Add safety checks for event structure
-            if (!event?.args || typeof event.args !== 'object') {
-              console.warn('Invalid guess event structure:', event);
-              return null;
-            }
-
-            const blockTimestamp = (event as any).blockTimestamp;
-            return {
-              address: event.args.guesser as `0x${string}`,
-              guess: event.args.guessString || "",
-              timestamp: blockTimestamp ? Number(blockTimestamp) * 1000 : Date.now(),
-              isCorrect: event.args.isCorrect,
-            } as Guess;
-          })
-          .filter((guess): guess is Guess => guess !== null);
-
-        let calculatedPrizePoolWei = contractData.prizePool !== undefined ? BigInt(contractData.prizePool) : BigInt(0);
-        let calculatedIsActive = contractData.isActive !== undefined ? contractData.isActive : true;
-
-        for (const event of guessEvents) {
-          if (event?.args && event.args.isCorrect) {
-            calculatedPrizePoolWei = BigInt(0);
-            calculatedIsActive = false;
-            break;
-          } else if (event?.args) {
-            calculatedPrizePoolWei += parseEther(FIXED_GUESS_FEE_ETH);
+      const formattedGuesses = guessEvents
+        .map(event => {
+          if (!event?.args || typeof event.args !== 'object') {
+            console.warn('Invalid guess event structure:', event);
+            return null;
           }
-        }
+          const blockTimestamp = (event as any).blockTimestamp;
+          return {
+            address: event.args.guesser as `0x${string}`,
+            guess: event.args.guessString || "",
+            timestamp: blockTimestamp ? Number(blockTimestamp) * 1000 : Date.now(),
+            isCorrect: event.args.isCorrect,
+          } as Guess;
+        })
+        .filter((g): g is Guess => g !== null)
+        .sort((a, b) => b.timestamp - a.timestamp);
 
-        setChallengeData({
-          id: contractData.id.toString(),
-          imageUrl: contractData.imageUrl,
-          creator: contractData.creator as `0x${string}`,
-          guesses: formattedGuesses.sort((a, b) => b.timestamp - a.timestamp),
-          prizePool: formatEther(calculatedPrizePoolWei),
-          isActive: calculatedIsActive,
-        });
-      } catch (error) {
-        console.error('Error processing guess events:', error);
-        // Fallback to basic challenge data without guesses
-        setChallengeData({
-          id: contractData.id.toString(),
-          imageUrl: contractData.imageUrl,
-          creator: contractData.creator as `0x${string}`,
-          guesses: [],
-          prizePool: contractData.prizePool ? formatEther(contractData.prizePool) : "0",
-          isActive: contractData.isActive !== undefined ? contractData.isActive : true,
-        });
+      const correctGuessEvent = formattedGuesses.find(g => g.isCorrect);
+      if (correctGuessEvent) {
+        currentIsActive = false;
+        currentRawPrizePool = BigInt(0);
+        setDynamicGuessFeeWei(BigInt(0));
+        setDynamicGuessFeeEth("0");
       }
+
+      setChallengeData(prevData => ({
+        ...(prevData as ChallengeData),
+        guesses: formattedGuesses,
+        prizePool: formatEther(currentRawPrizePool),
+        rawPrizePool: currentRawPrizePool,
+        isActive: currentIsActive,
+      }));
     }
   }, [guessEvents, fetchedChallengeData]);
 
@@ -175,9 +173,18 @@ const GuessPage = ({ params: paramsPromise }: { params: Promise<PageParams> }) =
       setNotification("Error: Please connect your wallet to make a guess.");
       return;
     }
+    if (dynamicGuessFeeWei === null) {
+      setNotification("Error: Guess fee not calculated yet. Please wait.");
+      return;
+    }
 
-    const feeInWei = parseEther(FIXED_GUESS_FEE_ETH);
-    if (userBalance && userBalance.value < feeInWei) {
+    if (challengeData.isActive && dynamicGuessFeeWei === BigInt(0) && challengeData.rawPrizePool > BigInt(0)) {
+    } else if (challengeData.isActive && dynamicGuessFeeWei === BigInt(0) && challengeData.rawPrizePool === BigInt(0)) {
+      setNotification("Error: Cannot guess on a challenge with no prize pool (fee is zero).");
+      return;
+    }
+
+    if (userBalance && userBalance.value < dynamicGuessFeeWei) {
       setNotification("Error: Insufficient balance to pay the guessing fee.");
       return;
     }
@@ -188,13 +195,12 @@ const GuessPage = ({ params: paramsPromise }: { params: Promise<PageParams> }) =
       await writeContractAsync({
         functionName: "makeGuess",
         args: [BigInt(challengeData.id), guess.trim()],
-        value: feeInWei,
+        value: dynamicGuessFeeWei,
       });
-      setNotification("Guess submitted! Waiting for confirmation...");
       setGuess("");
     } catch (error: any) {
-      console.error("Error submitting guess:", error);
-      setNotification(`Error: ${error.shortMessage || error.message || "Failed to submit guess."}`);
+      const contractError = error?.cause?.data?.message || error.shortMessage || error.message;
+      setNotification(`Error: ${contractError || "Failed to submit guess."}`);
     } finally {
     }
   };
@@ -345,7 +351,7 @@ const GuessPage = ({ params: paramsPromise }: { params: Promise<PageParams> }) =
                 <BanknotesIconSolid className="w-6 h-6 text-green-500" />
               </div>
               <div>
-                <div className="text-2xl font-bold text-gray-900 dark:text-white">{challengeData.prizePool} ETH</div>
+                <div className="text-2xl font-bold text-gray-900 dark:text-white">{challengeData.prizePool} FLOW</div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">Prize Pool</div>
               </div>
             </div>
@@ -433,7 +439,7 @@ const GuessPage = ({ params: paramsPromise }: { params: Promise<PageParams> }) =
                       <span className="text-green-700 dark:text-green-300 font-medium">Current Prize Pool:</span>
                     </div>
                     <span className="text-2xl font-bold text-green-600 dark:text-green-400">
-                      {challengeData.prizePool} ETH
+                      {challengeData.prizePool} FLOW
                     </span>
                   </div>
                 </div>
@@ -443,7 +449,7 @@ const GuessPage = ({ params: paramsPromise }: { params: Promise<PageParams> }) =
                     <BanknotesIcon className="w-5 h-5 text-purple-500" />
                     <span className="text-purple-700 dark:text-purple-300 font-medium">Guessing Fee:</span>
                   </div>
-                  <span className="font-semibold text-purple-600 dark:text-purple-400">{FIXED_GUESS_FEE_ETH} ETH</span>
+                  <span className="font-semibold text-purple-600 dark:text-purple-400">{dynamicGuessFeeEth} FLOW</span>
                 </div>
               </div>
             </div>
@@ -499,7 +505,7 @@ const GuessPage = ({ params: paramsPromise }: { params: Promise<PageParams> }) =
                       ) : (
                         <>
                           <LightBulbIcon className="w-5 h-5" />
-                          <span>Submit Guess ({FIXED_GUESS_FEE_ETH} ETH)</span>
+                          <span>Submit Guess ({dynamicGuessFeeEth} FLOW)</span>
                         </>
                       )}
                     </div>
