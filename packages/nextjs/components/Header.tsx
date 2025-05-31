@@ -37,11 +37,6 @@ export const menuLinks: HeaderMenuLink[] = [
     href: "/leaderboard",
     icon: <TrophyIcon className="h-4 w-4" />,
   },
-  {
-    label: "Debug",
-    href: "/debug",
-    icon: <BugAntIcon className="h-4 w-4" />,
-  },
 ];
 
 export const HeaderMenuLinks = () => {
@@ -86,10 +81,10 @@ export const Header = () => {
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-white/20 dark:border-gray-700/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Left side - Logo and Navigation */}
-          <div className="flex items-center space-x-8">
+          <div className="flex items-center space-x-3 sm:space-x-6 lg:space-x-8">
             {/* Mobile menu button */}
             <details className="dropdown lg:hidden" ref={burgerMenuRef}>
               <summary className="btn btn-ghost btn-sm hover:bg-white/50 dark:hover:bg-gray-800/50">
@@ -106,15 +101,15 @@ export const Header = () => {
             </details>
 
             {/* Logo */}
-            <Link href="/" className="flex items-center space-x-3 group">
-              <div className="relative w-10 h-10 rounded-2xl bg-gradient-to-r from-purple-500 to-blue-500 p-2 group-hover:scale-110 transition-transform duration-300">
+            <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group">
+              <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-r from-purple-500 to-blue-500 p-1.5 sm:p-2 group-hover:scale-110 transition-transform duration-300">
                 <SparklesIcon className="w-full h-full text-white" />
               </div>
               <div className="hidden sm:block">
-                <div className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                  Prompt Guesser
+                <div className="text-lg sm:text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent whitespace-nowrap">
+                  Prompt Genius
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-400 -mt-1">
+                <div className="text-xs text-gray-500 dark:text-gray-400 -mt-1 whitespace-nowrap">
                   AI Guessing Game
                 </div>
               </div>

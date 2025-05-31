@@ -1,6 +1,6 @@
 # Flow EVM Integration Guide
 
-This guide covers the integration of Flow EVM networks into the Prompt Guesser dApp, including setup, deployment, and troubleshooting.
+This guide covers the integration of Flow EVM networks into the Prompt Genius dApp, including setup, deployment, and troubleshooting.
 
 ## Overview
 
