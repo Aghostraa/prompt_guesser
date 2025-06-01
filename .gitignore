@@ -7,6 +7,7 @@ node_modules
 # whitelist essential dot files
 !.gitignore
 !.env.example
+!.yarnrc.yml
 
 # yarn
 .yarn/*
