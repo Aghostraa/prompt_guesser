@@ -17,6 +17,12 @@ Built using modern web3 technologies:
 - Blockchain Interaction: Wagmi, Viem
 - Network: Flow Testnet
 
+## 🌐 Live Demo
+
+Try the deployed application at: **https://prompt-guesser-nextjs.vercel.app/**
+
+Experience Prompt Genius live on the blockchain! Connect your wallet and start playing immediately.
+
 ## 🚀 Getting Started
 
 1. Install dependencies:
