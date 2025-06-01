@@ -175,4 +175,8 @@ yarn account
 3. **Deploy to Mainnet**: Once tested, deploy to Flow Mainnet
 4. **Monitor**: Use Flowscan to monitor your contracts and transactions
 
+<<<<<<< HEAD
+Your prompt genius game now has access to Flow's fast, affordable, and user-friendly blockchain infrastructure! 
+=======
 Your prompt guesser game now has access to Flow's fast, affordable, and user-friendly blockchain infrastructure!
+>>>>>>> ab4cb396e4e801361efff6b2f098e2c4106f92ff

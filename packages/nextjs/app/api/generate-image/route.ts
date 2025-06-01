@@ -33,9 +33,9 @@ async function uploadToPinata(imageBuffer: Buffer): Promise<string> {
     const metadata = JSON.stringify({
       name: `Challenge Image ${Date.now()}`,
       keyvalues: {
-        app: "prompt-guesser",
-        type: "challenge-image",
-      },
+        app: 'prompt-genius',
+        type: 'challenge-image'
+      }
     });
     formData.append("pinataMetadata", metadata);
     console.log("🏷️ Metadata added:", metadata);

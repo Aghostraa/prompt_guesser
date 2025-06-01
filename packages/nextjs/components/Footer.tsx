@@ -70,8 +70,8 @@ export const Footer = () => {
                 <SparklesIcon className="w-full h-full text-white" />
               </div>
               <div>
-                <div className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                  Prompt Guesser
+                <div className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
+                  Prompt Genius
                 </div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">AI Guessing Game</div>
               </div>
@@ -147,7 +147,7 @@ export const Footer = () => {
         <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
           <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
             <p className="text-sm text-gray-500 dark:text-gray-400 text-center sm:text-left">
-              © 2024 Prompt Guesser. Built with 💜 for the blockchain community.
+              © 2024 Prompt Genius. Built with 💜 for the blockchain community.
             </p>
             <div className="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
               <span>Powered by</span>

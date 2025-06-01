@@ -1,6 +1,6 @@
-# Flowscan Transaction Notifications 🌊
+# Flowscan Notifications Integration
 
-This document explains how Flowscan (Flow's Blockscout explorer) notifications are integrated into the Prompt Guesser application.
+This document explains how Flowscan (Flow's Blockscout explorer) notifications are integrated into the Prompt Genius application.
 
 ## ✅ Integration Complete
 
