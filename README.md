@@ -34,7 +34,21 @@ yarn chain
 yarn deploy
 ```
 
-4. Start the frontend:
+4. **Set up API keys for full functionality:**
+
+Create `packages/nextjs/.env.local` with your API keys:
+```bash
+# OpenAI API (Required for AI image generation)
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Pinata IPFS (Required for permanent image storage)
+PINATA_API_KEY=your_pinata_api_key
+PINATA_SECRET_KEY=your_pinata_secret_key
+```
+
+**Note:** Without these API keys, the application will run but image generation and IPFS storage features won't work.
+
+5. Start the frontend:
 ```bash
 yarn start
 ```
